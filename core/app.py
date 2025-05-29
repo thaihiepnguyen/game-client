@@ -14,7 +14,7 @@ class Application:
         self.scene_manager = SceneManager()
         self._load_scenes()
 
-        self.scene_manager.set_scene(LOGIN_SCENE)  # Set the initial scene
+        self.scene_manager.set_scene(LOGIN_SCENE)
     
     def _load_scenes(self):
         """
@@ -22,7 +22,7 @@ class Application:
         This method should be called to initialize the scenes.
         """
         from scenes.login import LoginScene
-        self.scene_manager.add_scene(LOGIN_SCENE, LoginScene())
+        self.scene_manager.add_scene(LOGIN_SCENE, LoginScene)
         # Add more scenes as needed
         # self.scene_manager.add_scene("main_menu", MainMenuScene())
 

@@ -3,6 +3,11 @@ from abc import ABC, abstractmethod
 
 
 class Scene(ABC):
+    def __init__(self, scene_manager):
+        super().__init__()
+        self.scene_manager = scene_manager
+
+
     @abstractmethod
     def draw(self, screen: pygame.Surface):
         """

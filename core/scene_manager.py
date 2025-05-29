@@ -14,7 +14,7 @@ class SceneManager:
             name (str): The name of the scene.
             scene (Scene.Scene): The scene instance to add.
         """
-        self.scenes[name] = scene
+        self.scenes[name] = scene(self)
 
     def set_scene(self, name: str):
         """

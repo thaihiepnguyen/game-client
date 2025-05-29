@@ -1,9 +1,11 @@
 import pygame
 from core.scene import Scene
+from core.scene_manager import SceneManager
 
 class LoginScene(Scene):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, scene_manager: SceneManager):
+        super().__init__(scene_manager)
+
         self.background_color = (0, 0, 0) 
         self.font = pygame.font.Font(None, 36)
 
