@@ -1,8 +1,5 @@
-
-
-
-
-
+from core.app import Application
 
 if __name__ == "__main__":
-    print("Hello, World!")
+    app = Application()
+    app.run()
