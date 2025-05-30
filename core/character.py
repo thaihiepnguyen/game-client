@@ -6,7 +6,7 @@ CHARACTER_RECT_HEIGHT = 180
 
 class Character(ABC):
     def __init__(self, x: float, y: float):
-        self.rect = pygame.Rect((x, y, CHARACTER_RECT_WIDTH, CHARACTER_RECT_HEIGHT))
+        self._rect = pygame.Rect((x, y, CHARACTER_RECT_WIDTH, CHARACTER_RECT_HEIGHT))
 
     @abstractmethod
     def draw(self, screen: pygame.Surface) -> None:
@@ -24,8 +24,8 @@ class Character(ABC):
         :param dy: pixel to move in the y direction
         :return:
         """
-        self.rect.x += dx
-        self.rect.y += dy
+        self._rect.x += dx
+        self._rect.y += dy
         # Ensure the character stays within the screen bounds
-        self.rect.x = max(0, min(self.rect.x, screen.get_width() - self.rect.width))
-        self.rect.y = max(0, min(self.rect.y, screen.get_height() - self.rect.height))
+        self._rect.x = max(0, min(self._rect.x, screen.get_width() - self._rect.width))
+        self._rect.y = max(0, min(self._rect.y, screen.get_height() - self._rect.height))
