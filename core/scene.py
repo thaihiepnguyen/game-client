@@ -7,34 +7,28 @@ class Scene(ABC):
         super().__init__()
         self.scene_manager = scene_manager
 
-
     @abstractmethod
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface) -> None:
         """
-        Draw the scene on the given screen surface.
-
-        Args:
-            screen (pygame.Surface): The surface to draw on.
+        Draw the scene on the current screen surface.
+        :param screen: The screen surface to draw on.
         """
         pass
 
     @abstractmethod
-    def handle_event(self, event: pygame.event.Event):
+    def handle_event(self, event: pygame.event.Event) -> None:
         """
         Handle a single event.
-
-        Args:
-            event (pygame.event.Event): The event to handle.
+        :param event: The event.
         """
         pass
 
     @abstractmethod
-    def update(self, delta_time: float):
+    def update(self, screen: pygame.Surface, delta_time: float) -> None:
         """
         Update the scene with the given delta time.
-
-        Args:
-            delta_time (float): The time since the last update in seconds.
+        :param screen: The screen surface.
+        :param delta_time: The delta time.
         """
         pass
 

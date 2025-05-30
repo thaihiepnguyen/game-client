@@ -2,8 +2,8 @@
 
 
 # Constants for the game
-WINDOW_WIDTH = 1200
-WINDOW_HEIGHT = 800
+WINDOW_WIDTH = 1000
+WINDOW_HEIGHT = 600
 WINDOW_TITLE = "Fighting Game"
 LOCK_FPS = 60
 
@@ -13,3 +13,4 @@ BACKGROUND_IMAGE = "assets/images/background/background.jpg"
 # Constants for scene management
 MAIN_MENU_SCENE = "main_menu"
 LOGIN_SCENE = "login"
+BATTLE_SCENE = "battle"

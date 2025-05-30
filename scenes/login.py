@@ -1,9 +1,8 @@
 import pygame
 from core.scene import Scene
-from core.scene_manager import SceneManager
 
 class LoginScene(Scene):
-    def __init__(self, scene_manager: SceneManager):
+    def __init__(self, scene_manager):
         super().__init__(scene_manager)
 
         self.background_color = (0, 0, 0) 
@@ -16,8 +15,8 @@ class LoginScene(Scene):
         screen.blit(text, text_rect)
 
     def handle_event(self, event: pygame.event.Event):
-        if event.type == pygame.QUIT:
-            pygame.quit()
+        if event.type == pygame.KEYDOWN:
+            print(f"Key pressed: {pygame.key.name(event.key)}")
 
-    def update(self, delta_time: float):
+    def update(self, screen: pygame.Surface, delta_time: float):
         pass
