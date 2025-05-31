@@ -6,6 +6,7 @@ WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
 WINDOW_TITLE = "Fighting Game"
 LOCK_FPS = 60
+GRAVITY = 2 * pow(LOCK_FPS, 2) # converted to per frame
 
 # Constants for asset paths
 BACKGROUND_IMAGE = "assets/images/background/background.jpg"
