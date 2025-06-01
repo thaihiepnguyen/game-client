@@ -4,6 +4,7 @@ from core.scene import Scene
 from core.const import BACKGROUND_IMAGE
 from sprites.fighter import Fighter
 from core.gui.button import Button
+from sprites.health_bar import HealthBar
 import pygame
 
 class BattleScene(Scene):
@@ -15,37 +16,39 @@ class BattleScene(Scene):
             y=200, 
             speed=300, 
             weight=1,
-            jump_velocity=30
+            jump_velocity=30,
+            atk=10
+        )
+        self.__health_bar_tl = HealthBar(
+            'topleft',
+            self.__fighter
         )
         self.__opponent = Fighter(
             x=500, 
             y=200, 
             speed=300, 
             weight=1,
-            jump_velocity=30
+            jump_velocity=30,
+            atk=6
         )
-        self.__testBtn = Button(
-            text="Test Button",
-            font=pygame.font.Font(None, 36),
-            pos=(50, 50),
-            size=(200, 50),
-            color=(255, 0, 0)
+        self.__health_bar_tr = HealthBar(
+            'topright',
+            self.__opponent
         )
-
-        self.__testBtn.on_click(lambda event: print("Button clicked!"))
-
 
     @override
     def draw(self, screen: pygame.Surface) -> None:
         scaled_bg_image = pygame.transform.scale(self.__bg_image, (screen.get_width(), screen.get_height()))
         screen.blit(scaled_bg_image, (0, 0))
         self.__fighter.draw(screen)
+        self.__health_bar_tl.draw(screen)
         self.__opponent.draw(screen)
-        self.__testBtn.draw(screen)
+        self.__health_bar_tr.draw(screen)
+        self.__fighter.look_at(self.__opponent)
 
     @override
     def handle_event(self, event: pygame.event.Event):
-        self.__testBtn.handle_event(event)
+        pass
 
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
@@ -54,10 +57,17 @@ class BattleScene(Scene):
         self.__fighter.apply_gravity(ground_y, delta_time)
         self.__opponent.apply_gravity(ground_y, delta_time)
 
+        if self.__fighter.is_dead() or self.__opponent.is_dead():
+            pass
+
+        self.__fighter.update(screen, delta_time)
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.__fighter.move(screen, -speed * delta_time) # each frame move speed * delta_time pixels
         if keys[pygame.K_RIGHT]:
             self.__fighter.move(screen, speed * delta_time)
+        if keys[pygame.K_z]:
+            self.__fighter.attack(screen, self.__opponent)
         if keys[pygame.K_SPACE]:
             self.__fighter.jump()

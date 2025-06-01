@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 
 class Scene(ABC):
-    def __init__(self, scene_manager):
+    def __init__(self, scene_manager): # can not define type of this variable because of cicular dependency
         super().__init__()
         self._scene_manager = scene_manager
 
