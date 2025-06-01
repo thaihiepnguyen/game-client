@@ -8,9 +8,10 @@ CHARACTER_RECT_WIDTH = 80
 CHARACTER_RECT_HEIGHT = 180
 
 class ActionType(Enum):
-    NORMAL = "normal"
+    IDLE = "idle"
     JUMP = "jump"
     RUN = "run"
+    ATK = "atk"
 
 
 class Character(ABC):
@@ -27,18 +28,18 @@ class Character(ABC):
         self.__action_index_map = self._set_action_index_map()
         self.__animation_steps = self._set_animation_steps()
         self.__frame_index = 0
-        self.__action_index = self.__action_index_map[ActionType.NORMAL]
+        self.__action_index = self.__action_index_map[ActionType.IDLE]
         self.__animation_list = self.__load_sprites()
 
         # protected
         self._rect = pygame.Rect((x, y, CHARACTER_RECT_WIDTH, CHARACTER_RECT_HEIGHT))
         self._flip = False
         self._velocity_y = 0
+        self._moving = False
+        self._attacking = False
         self._speed = speed
         self._weight = weight # (e.g, 1.0 for normal, 2.0 for heavy)
         self._jump_velocity = jump_velocity
-        self._is_on_ground = False
-        self._is_running = False
 
 
     @abstractmethod
@@ -65,15 +66,22 @@ class Character(ABC):
         if not self.__can_update_animation():
             return
 
-        if not self._is_on_ground:
+        if self._attacking:
+            self.__update_action(ActionType.ATK)
+        elif self._velocity_y != 0:
             self.__update_action(ActionType.JUMP)
-        if self._is_running:
+        elif self._moving:
             self.__update_action(ActionType.RUN)
         else:
-            self.__update_action(ActionType.NORMAL)
+            self.__update_action(ActionType.IDLE)
 
-        self.__frame_index = 0 if self.__frame_index == len(self.__animation_list[self.__action_index]) - 1 else self.__frame_index + 1
-
+        if self.__frame_index == len(self.__animation_list[self.__action_index]) - 1:
+            if self.__action_index == self.__action_index_map[ActionType.ATK]:
+                self._attacking = False
+            self.__frame_index = 0
+        else:
+            self.__frame_index += 1
+        
         self.__last_update_time = pygame.time.get_ticks()
 
     @abstractmethod
@@ -83,9 +91,10 @@ class Character(ABC):
     @abstractmethod
     def _set_action_index_map(self) -> Dict[ActionType, int]:
         return {
-            ActionType.NORMAL: 0,
+            ActionType.IDLE: 0,
             ActionType.RUN: 1,
             ActionType.JUMP: 2,
+            ActionType.ATK: 3
         }
 
     @abstractmethod
@@ -117,10 +126,12 @@ class Character(ABC):
 
     def __update_action(self, new_action_type: ActionType):
         new_action_index = self.__action_index_map[new_action_type]
-        if self.__action_index != new_action_index:
-            self.__action_index = new_action_index
-            self.__frame_index = 0
-            self.__last_update_time = pygame.time.get_ticks()
+        if self.__action_index == new_action_index:
+            return
+        
+        self.__action_index = new_action_index
+        self.__frame_index = 0
+        self.__last_update_time = pygame.time.get_ticks()
 
     def is_dead(self):
         return self.__hp == 0
@@ -134,6 +145,9 @@ class Character(ABC):
     def get_atk(self):
         return self.__atk
 
+    def get_speed(self):
+        return self._speed
+
     def take_damage(self, oppenent: "Character"):
         self.__hp -= min(self.__hp, oppenent.get_atk())
 
@@ -144,9 +158,6 @@ class Character(ABC):
         if self._rect.bottom >= ground_y:
             self._rect.bottom = ground_y
             self._velocity_y = 0
-            self._is_on_ground = True
-        else:
-            self._is_on_ground = False
 
     def look_at(self, opponent: "Character"):
         self._flip = self._rect.centerx > opponent._rect.centerx
@@ -154,6 +165,7 @@ class Character(ABC):
     def attack(self, screen: pygame.Surface, opponent: "Character"):
         if not self.__can_attack():
             return
+        self._attacking = True
         attacking_rect = pygame.Rect(self._rect.centerx - (1.5 * self._rect.width * self._flip), self._rect.y, 1.5 * self._rect.width, self._rect.height)
         if attacking_rect.colliderect(opponent._rect):
             if opponent.get_hp() > 0:
@@ -162,21 +174,23 @@ class Character(ABC):
         self.__last_attack_time = pygame.time.get_ticks()
 
     def move(self, screen: pygame.Surface, dx: float) -> None:
-        self._is_running = True
         """
         Move the character by dx, ensuring it stays within the screen bounds.
         :param screen: pygame.Surface
         :param dx: pixel to move in the x direction
         :return:
         """
+        if self._attacking == True:
+            return
+
+        self._moving = True
         self._rect.x += dx
         # Ensure the character stays within the screen bounds
         self._rect.x = max(0, min(self._rect.x, screen.get_width() - self._rect.width))
     
     def jump(self) -> None:
-        if self._is_on_ground:
+        if not self._velocity_y:
             self._velocity_y = -self._jump_velocity * LOCK_FPS
-            self._is_on_ground = False
 
-    def get_speed(self):
-        return self._speed
+    def idle(self):
+        self._moving = False

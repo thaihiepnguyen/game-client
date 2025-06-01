@@ -63,6 +63,7 @@ class BattleScene(Scene):
         self.__fighter.update(screen, delta_time)
 
         keys = pygame.key.get_pressed()
+
         if keys[pygame.K_LEFT]:
             self.__fighter.move(screen, -speed * delta_time) # each frame move speed * delta_time pixels
         if keys[pygame.K_RIGHT]:
@@ -71,3 +72,5 @@ class BattleScene(Scene):
             self.__fighter.attack(screen, self.__opponent)
         if keys[pygame.K_SPACE]:
             self.__fighter.jump()
+        if not any(keys):
+            self.__fighter.idle()
