@@ -52,7 +52,6 @@ class BattleScene(Scene):
 
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
-        speed = self.__fighter.get_speed()
         ground_y = screen.get_height() * 4.075 / 5
         self.__fighter.apply_gravity(ground_y, delta_time)
         self.__opponent.apply_gravity(ground_y, delta_time)
@@ -65,9 +64,9 @@ class BattleScene(Scene):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_LEFT]:
-            self.__fighter.move(screen, -speed * delta_time) # each frame move speed * delta_time pixels
+            self.__fighter.move(screen, -self.__fighter.get_speed() * delta_time) # each frame move speed * delta_time pixels
         if keys[pygame.K_RIGHT]:
-            self.__fighter.move(screen, speed * delta_time)
+            self.__fighter.move(screen, self.__fighter.get_speed() * delta_time)
         if keys[pygame.K_z]:
             self.__fighter.attack(screen, self.__opponent)
         if keys[pygame.K_SPACE]:

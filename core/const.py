@@ -15,3 +15,7 @@ BACKGROUND_IMAGE = "assets/images/background/background.jpg"
 MAIN_MENU_SCENE = "main_menu"
 LOGIN_SCENE = "login"
 BATTLE_SCENE = "battle"
+
+# Constants for animations
+ANIMATION_COOLDOWN = 50
+ATTACK_COOLDOWN = 300
