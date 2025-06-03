@@ -1,23 +1,26 @@
 from typing import override
 
 from core.scene.scene import Scene
-from core.const import BACKGROUND_IMAGE
 from sprites.characters.warrior.warrior import Warrior
+from sprites.characters.samurai.samurai import Samurai
 from sprites.characters.warrior.warrior_animation import WarriorAnimation
+from sprites.characters.samurai.samurai_animation import SamuraiAnimation
+from sprites.backgrounds.street.street_animation import StreetAnimation
+
 from sprites.health_bar import HealthBar
 import pygame
 
 class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
-        self.__bg_image = pygame.image.load(BACKGROUND_IMAGE).convert_alpha()
-        self.__fighter = Warrior(
+        self.__bg_animation = StreetAnimation()
+        self.__fighter = Samurai(
             x=100, 
             y=200,
-            animation=WarriorAnimation(),
+            animation=SamuraiAnimation(),
             speed=300, 
             weight=1,
-            jump_velocity=30,
+            jump_velocity=32,
             atk=10
         )
         self.__health_bar_tl = HealthBar(
@@ -40,7 +43,7 @@ class BattleScene(Scene):
 
     @override
     def draw(self, screen: pygame.Surface) -> None:
-        scaled_bg_image = pygame.transform.scale(self.__bg_image, (screen.get_width(), screen.get_height()))
+        scaled_bg_image = pygame.transform.scale(self.__bg_animation.get_current_frame(), (screen.get_width(), screen.get_height()))
         screen.blit(scaled_bg_image, (0, 0))
         self.__fighter.draw(screen)
         self.__health_bar_tl.draw(screen)
@@ -55,7 +58,9 @@ class BattleScene(Scene):
 
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
-        ground_y = screen.get_height() * 4.075 / 5
+        self.__bg_animation.update(delta_time)
+
+        ground_y = screen.get_height() * 4.5 / 5
         self.__fighter.apply_gravity(ground_y, delta_time)
         self.__opponent.apply_gravity(ground_y, delta_time)
 

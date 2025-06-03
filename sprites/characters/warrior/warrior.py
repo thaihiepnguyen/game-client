@@ -11,6 +11,16 @@ class Warrior(Character):
     @override
     def draw(self, screen: pygame.Surface, debug: bool = False) -> None:
         super().draw(screen)
+        if debug:
+            pygame.draw.rect(screen, (255, 0, 0), self._rect)
+
+        image = self._character_animation.get_current_frame(self._flipped)
+
+        sprite_scale = self._character_animation.get_current_animation().get_sprite().get_scale()
+
+        offset_x = self._rect.x - (72 * sprite_scale)
+        offset_y = self._rect.y - (56 * sprite_scale)
+        screen.blit(image, (offset_x, offset_y))
 
     @override
     def update(self, screen: pygame.Surface, delta_time: float):

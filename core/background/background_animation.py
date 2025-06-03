@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+
+import pygame
 from core.animation.animation import Animation
 
 
@@ -22,3 +24,6 @@ class BackgroundAnimation(ABC):
         :return:
         """
         self.__animation.update(delta_time)
+    
+    def get_current_frame(self) -> pygame.Surface:
+        return self.__animation.get_current_frame(darken=60)

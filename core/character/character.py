@@ -50,16 +50,9 @@ class Character(ABC):
         :param screen: The screen surface to draw on.
         :param debug:
         """
-        if debug:
-            pygame.draw.rect(screen, (255, 0, 0), self._rect)
-
-        image = self._character_animation.get_current_frame(self._flipped)
-
-        sprite_scale = self._character_animation.get_current_animation().get_sprite().get_scale()
-
-        offset_x = self._rect.x - (72 * sprite_scale)
-        offset_y = self._rect.y - (56 * sprite_scale)
-        screen.blit(image, (offset_x, offset_y))
+        if self._velocity_y == 0.0:
+            shadow_rect = pygame.Rect(self._rect.centerx - 30, self._rect.bottom - 10, 90, 20)
+            pygame.draw.ellipse(screen, (0, 0, 0, 80), shadow_rect)
 
     @abstractmethod
     def update(self, screen: pygame.Surface, delta_time: float) -> None:
