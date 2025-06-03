@@ -3,10 +3,10 @@ from abc import ABC, abstractmethod
 from core.const import ATTACK_COOLDOWN, GRAVITY, LOCK_FPS
 from enum import Enum
 
-from sprites.characters.animation_manager import AnimationManager
+from core.character.character_animation import CharacterAnimation
 
-CHARACTER_RECT_WIDTH = 40
-CHARACTER_RECT_HEIGHT = 90
+CHARACTER_RECT_WIDTH = 80
+CHARACTER_RECT_HEIGHT = 180
 
 class ActionType(Enum):
     IDLE = "idle"
@@ -16,7 +16,7 @@ class ActionType(Enum):
 
 
 class Character(ABC):
-    def __init__(self, x: float, y: float, speed: float, weight: float, jump_velocity: float, atk: float):
+    def __init__(self, x: float, y: float, character_animation: CharacterAnimation, speed: float, weight: float, jump_velocity: float, atk: float):
         if speed < 0 or weight <= 0 or jump_velocity < 0 or atk < 0:
             raise ValueError("Speed, weight, jump_velocity, and atk must be non-negative.")
 
@@ -24,6 +24,8 @@ class Character(ABC):
         self._max_hp = 100
         self._current_hp = self._max_hp
         self._atk = atk
+
+        # Attack cooldown
         self._last_attack_time = 0
 
         # Movement attributes
@@ -35,9 +37,10 @@ class Character(ABC):
         self._moving = False
         self._attacking = False
         self._flipped = False
+        self._taking_damage = False
 
         # Animation setup
-        self._animation_manager = self._set_animation()
+        self._character_animation = character_animation
 
 
     @abstractmethod
@@ -45,13 +48,14 @@ class Character(ABC):
         """
         Draw the character on the current screen surface.
         :param screen: The screen surface to draw on.
+        :param debug:
         """
         if debug:
             pygame.draw.rect(screen, (255, 0, 0), self._rect)
 
-        image = self._animation_manager.get_current_frame(self._flipped)
+        image = self._character_animation.get_current_frame(self._flipped)
 
-        sprite_scale = self._animation_manager.sprite_scale()
+        sprite_scale = self._character_animation.get_current_animation().get_sprite().get_scale()
 
         offset_x = self._rect.x - (72 * sprite_scale)
         offset_y = self._rect.y - (56 * sprite_scale)
@@ -67,16 +71,16 @@ class Character(ABC):
 
         action_type = self._determine_action()
 
-        self._animation_manager.update(action_type)
+        self._character_animation.update(action_type, delta_time)
 
-        if self._animation_manager.is_animation_complete():
+        if self._character_animation.get_current_animation().is_complete():
             if action_type == 'atk':
                 self._attacking = False
-            self._animation_manager.reset_frame()
+            if action_type == 'hit':
+                self._taking_damage = False
+            if action_type == 'death':
+                self._character_animation.stop_update()
 
-    @abstractmethod
-    def _set_animation(self) -> AnimationManager:
-        pass
 
     def apply_gravity(self, ground_y: float, delta_time: float) -> None:
         """Apply gravity to the character's vertical movement."""
@@ -109,7 +113,7 @@ class Character(ABC):
         self._attacking = True
         self._last_attack_time = pygame.time.get_ticks()
 
-        attack_width = 1.5 * self._rect.width
+        attack_width = 2 * self._rect.width
         attack_x = self._rect.centerx - attack_width if self._flipped else self._rect.centerx
         attacking_rect = pygame.Rect(attack_x, self._rect.y, attack_width, self._rect.height)
 
@@ -125,6 +129,7 @@ class Character(ABC):
 
     def take_damage(self, opponent: "Character") -> None:
         """Reduce HP based on opponent's attack."""
+        self._taking_damage = True
         self._current_hp = max(0, self._current_hp - opponent.get_atk())
 
     def idle(self) -> None:
@@ -152,6 +157,10 @@ class Character(ABC):
 
     def _determine_action(self) -> str:
         """Determine the current action based on state."""
+        if self._current_hp == 0:
+            return 'death'
+        if self._taking_damage:
+            return 'hit'
         if self._velocity_y != 0.0:
             return 'jump'
         if self._attacking:

@@ -1,5 +1,5 @@
 import pygame
-from core.character import Character
+from core.character.character import Character
 
 
 

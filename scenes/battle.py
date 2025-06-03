@@ -1,9 +1,9 @@
 from typing import override
 
-from core.scene import Scene
+from core.scene.scene import Scene
 from core.const import BACKGROUND_IMAGE
-from sprites.fighter import Fighter
-from core.gui.button import Button
+from sprites.characters.warrior.warrior import Warrior
+from sprites.characters.warrior.warrior_animation import WarriorAnimation
 from sprites.health_bar import HealthBar
 import pygame
 
@@ -11,9 +11,10 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_image = pygame.image.load(BACKGROUND_IMAGE).convert_alpha()
-        self.__fighter = Fighter(
+        self.__fighter = Warrior(
             x=100, 
-            y=200, 
+            y=200,
+            animation=WarriorAnimation(),
             speed=300, 
             weight=1,
             jump_velocity=30,
@@ -23,9 +24,10 @@ class BattleScene(Scene):
             'topleft',
             self.__fighter
         )
-        self.__opponent = Fighter(
+        self.__opponent = Warrior(
             x=500, 
-            y=200, 
+            y=200,
+            animation=WarriorAnimation(),
             speed=300, 
             weight=1,
             jump_velocity=30,
@@ -45,6 +47,7 @@ class BattleScene(Scene):
         self.__opponent.draw(screen)
         self.__health_bar_tr.draw(screen)
         self.__fighter.look_at(self.__opponent)
+        self.__opponent.look_at(self.__fighter)
 
     @override
     def handle_event(self, event: pygame.event.Event):
@@ -57,9 +60,11 @@ class BattleScene(Scene):
         self.__opponent.apply_gravity(ground_y, delta_time)
 
         if self.__fighter.is_dead() or self.__opponent.is_dead():
+            # game end logic can be handled here
             pass
 
         self.__fighter.update(screen, delta_time)
+        self.__opponent.update(screen, delta_time)
 
         keys = pygame.key.get_pressed()
 

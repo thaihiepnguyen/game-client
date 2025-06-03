@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from core.const import *
-from core.scene_manager import SceneManager
+from core.scene.scene_manager import SceneManager
 
 class Application:
     def __init__(self):

@@ -1,6 +1,6 @@
-import core.scene as Scene
 from scenes.battle import BattleScene
 from scenes.login import LoginScene
+from core.scene import scene
 from core.const import *
 
 class SceneManager:
@@ -8,7 +8,7 @@ class SceneManager:
         self.scenes = {}
         self.current_scene = None
 
-    def _add_scene(self, name: str, scene: type[Scene.Scene]) -> None:
+    def _add_scene(self, name: str, scene: type[scene.Scene]) -> None:
         """
         Add a scene to the manager.
         :param name: The name of the scene to add.
@@ -40,7 +40,7 @@ class SceneManager:
         else:
             raise ValueError(f"Scene '{name}' not found in SceneManager.")
     
-    def get_scene(self) -> Scene.Scene:
+    def get_scene(self) -> scene.Scene:
         """
         Get the current scene.
         :return: The current scene instance.

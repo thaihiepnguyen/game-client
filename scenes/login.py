@@ -1,7 +1,7 @@
 from typing import override
 
 import pygame
-from core.scene import Scene
+from core.scene.scene import Scene
 
 class LoginScene(Scene):
     def __init__(self, scene_manager):
