@@ -158,6 +158,8 @@ class Character(ABC):
             pygame.draw.rect(screen, (255, 0, 0), attacking_rect)
 
     def look_at(self, opponent: "Character") -> None:
+        if self.is_dead():
+            return
         """Flip the character to face the opponent."""
         self._flipped = self._rect.centerx > opponent._rect.centerx
 
