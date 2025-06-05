@@ -22,7 +22,6 @@ class Character(ABC):
         self._speed = speed
         self._weight = weight
         self._jump_velocity = jump_velocity
-        self._running = False
         self._moving = False
         self._attacking = False
         self._flipped = False
@@ -123,7 +122,6 @@ class Character(ABC):
     def idle(self) -> None:
         """Set the character to idle state."""
         self._moving = False
-        self._running = False
 
     def get_hp(self) -> float:
         """Get current HP."""
@@ -154,8 +152,6 @@ class Character(ABC):
             return 'jump'
         if self._attacking:
             return 'atk'
-        if self._running:
-            return 'run'
         if self._moving:
             return 'walk'
         return 'idle'
