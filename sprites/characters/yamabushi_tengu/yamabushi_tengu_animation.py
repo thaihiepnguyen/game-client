@@ -6,16 +6,6 @@ from core.animation.sprite import Sprite
 
 class YamabushiTenguAnimation(CharacterAnimation):
     @override
-    def _load_run_animation(self) -> Animation:
-        sprite = Sprite(
-            dir="assets/images/yamabushi_tengu/Sprites/Run.png",
-            w=128,
-            h=128,
-            count=8,
-        )
-        return Animation(sprite=sprite, frame_duration=0.1)
-    
-    @override
     def _load_walk_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/yamabushi_tengu/Sprites/Walk.png",

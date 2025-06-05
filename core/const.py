@@ -17,4 +17,4 @@ LOGIN_SCENE = "login"
 BATTLE_SCENE = "battle"
 
 # Constants for animations
-ATTACK_COOLDOWN = 300
+ATTACK_COOLDOWN = 500

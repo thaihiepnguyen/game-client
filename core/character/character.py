@@ -88,17 +88,6 @@ class Character(ABC):
         self._rect.x += dx
         self._rect.clamp_ip(screen.get_rect())
 
-    def run(self, screen: pygame.Surface, dx: float) -> None:
-        """Move the character horizontally within screen bounds."""
-        if (dx < 0 and not self._flipped) or (dx > 0 and self._flipped):
-            return
-        if self._attacking:
-            return
-
-        self._running = dx != 0
-        self._rect.x += dx
-        self._rect.clamp_ip(screen.get_rect())
-
     def jump(self) -> None:
         """Make the character jump if on the ground."""
         if self._velocity_y == 0.0:  # Only jump if on ground

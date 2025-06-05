@@ -18,13 +18,13 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = StreetAnimation()
-        self.__fighter = YamabushiTengu(
+        self.__fighter = Samurai(
             x=100, 
             y=200,
-            animation=YamabushiTenguAnimation(),
+            animation=SamuraiAnimation(),
             speed=300, 
             weight=1,
-            jump_velocity=38,
+            jump_velocity=30,
             atk=10
         )
         self.__health_bar_tl = HealthBar(
@@ -77,12 +77,6 @@ class BattleScene(Scene):
 
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_LEFT] and keys[pygame.K_LSHIFT]:
-            self.__fighter.run(screen, -self.__fighter.get_speed() * delta_time * 1.5)
-            return
-        if keys[pygame.K_RIGHT] and keys[pygame.K_LSHIFT]:
-            self.__fighter.run(screen, self.__fighter.get_speed() * delta_time * 1.5)
-            return
         if keys[pygame.K_LEFT]:
             self.__fighter.move(screen, -self.__fighter.get_speed() * delta_time)
         if keys[pygame.K_RIGHT]:

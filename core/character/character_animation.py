@@ -60,21 +60,12 @@ class CharacterAnimation(ABC):
         """
         return {
             "walk": self._load_walk_animation(),
-            "run": self._load_run_animation(),
             "jump": self._load_jump_animation(),
             "idle": self._load_idle_animation(),
             "atk": self._load_attack_animation(),
             "hit": self._load_hit_animation(),
             "death": self._load_death_animation()
         }
-
-    @abstractmethod
-    def _load_run_animation(self) -> Animation:
-        """
-        Load the run animation frames.
-        :return: An Animation object for the run action.
-        """
-        pass
     
     @abstractmethod
     def _load_walk_animation(self) -> Animation:

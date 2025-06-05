@@ -6,22 +6,12 @@ from core.animation.sprite import Sprite
 
 class SamuraiAnimation(CharacterAnimation):
     @override
-    def _load_run_animation(self) -> Animation:
-        sprite = Sprite(
-            dir="assets/images/samurai/Sprites/Run.png",
-            w=128,
-            h=128,
-            count=8,
-        )
-        return Animation(sprite=sprite, frame_duration=0.1)
-    
-    @override
     def _load_walk_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/samurai/Sprites/Walk.png",
             w=128,
             h=128,
-            count=8,
+            count=9,
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
@@ -31,9 +21,9 @@ class SamuraiAnimation(CharacterAnimation):
             dir="assets/images/samurai/Sprites/Jump.png",
             w=128,
             h=128,
-            count=12,
+            count=7,
         )
-        return Animation(sprite=sprite, frame_duration=0.05)
+        return Animation(sprite=sprite, frame_duration=0.1)
 
     @override
     def _load_idle_animation(self) -> Animation:
@@ -41,7 +31,7 @@ class SamuraiAnimation(CharacterAnimation):
             dir="assets/images/samurai/Sprites/Idle.png",
             w=128,
             h=128,
-            count=6,
+            count=5,
         )
         return Animation(sprite=sprite, frame_duration=0.05)
 
@@ -51,7 +41,7 @@ class SamuraiAnimation(CharacterAnimation):
             dir="assets/images/samurai/Sprites/Attack_1.png",
             w=128,
             h=128,
-            count=6,
+            count=4,
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
@@ -71,6 +61,6 @@ class SamuraiAnimation(CharacterAnimation):
             dir="assets/images/samurai/Sprites/Dead.png",
             w=128,
             h=128,
-            count=3,
+            count=6,
         )
         return Animation(sprite=sprite, frame_duration=0.1)
