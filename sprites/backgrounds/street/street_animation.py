@@ -12,7 +12,6 @@ class StreetAnimation(BackgroundAnimation):
             w=640,
             h=324,
             count=8,
-            scale=1
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 

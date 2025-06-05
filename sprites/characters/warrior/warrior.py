@@ -16,7 +16,7 @@ class Warrior(Character):
 
         image = self._character_animation.get_current_frame(self._flipped)
 
-        sprite_scale = self._character_animation.get_current_animation().get_sprite().get_scale()
+        sprite_scale = self._character_animation.get_current_animation().get_scale()
 
         offset_x = self._rect.x - (72 * sprite_scale)
         offset_y = self._rect.y - (56 * sprite_scale)

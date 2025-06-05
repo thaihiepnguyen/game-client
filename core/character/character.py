@@ -5,16 +5,6 @@ from enum import Enum
 
 from core.character.character_animation import CharacterAnimation
 
-CHARACTER_RECT_WIDTH = 80
-CHARACTER_RECT_HEIGHT = 180
-
-class ActionType(Enum):
-    IDLE = "idle"
-    JUMP = "jump"
-    RUN = "run"
-    ATK = "atk"
-
-
 class Character(ABC):
     def __init__(self, x: float, y: float, character_animation: CharacterAnimation, speed: float, weight: float, jump_velocity: float, atk: float):
         if speed < 0 or weight <= 0 or jump_velocity < 0 or atk < 0:
@@ -29,11 +19,12 @@ class Character(ABC):
         self._last_attack_time = 0
 
         # Movement attributes
-        self._rect = pygame.Rect(x, y, CHARACTER_RECT_WIDTH, CHARACTER_RECT_HEIGHT)
+        self._rect = pygame.Rect(x, y, 0, 0)
         self._velocity_y = 0.0
         self._speed = speed
         self._weight = weight
         self._jump_velocity = jump_velocity
+        self._running = False
         self._moving = False
         self._attacking = False
         self._flipped = False
@@ -50,6 +41,12 @@ class Character(ABC):
         :param screen: The screen surface to draw on.
         :param debug:
         """
+        
+        rect_h = screen.get_height() * 1 / 3
+        rect_w = rect_h * 1.3 / 3
+        self._rect.height = rect_h
+        self._rect.width = rect_w
+
         if self._velocity_y == 0.0:
             shadow_rect = pygame.Rect(self._rect.centerx - 30, self._rect.bottom - 10, 90, 20)
             pygame.draw.ellipse(screen, (0, 0, 0, 80), shadow_rect)
@@ -93,6 +90,15 @@ class Character(ABC):
         self._rect.x += dx
         self._rect.clamp_ip(screen.get_rect())
 
+    def run(self, screen: pygame.Surface, dx: float) -> None:
+        """Move the character horizontally within screen bounds."""
+        if self._attacking:
+            return
+
+        self._running = dx != 0
+        self._rect.x += dx
+        self._rect.clamp_ip(screen.get_rect())
+
     def jump(self) -> None:
         """Make the character jump if on the ground."""
         if self._velocity_y == 0.0:  # Only jump if on ground
@@ -128,6 +134,7 @@ class Character(ABC):
     def idle(self) -> None:
         """Set the character to idle state."""
         self._moving = False
+        self._running = False
 
     def get_hp(self) -> float:
         """Get current HP."""
@@ -158,8 +165,10 @@ class Character(ABC):
             return 'jump'
         if self._attacking:
             return 'atk'
-        if self._moving:
+        if self._running:
             return 'run'
+        if self._moving:
+            return 'walk'
         return 'idle'
 
     def _can_attack(self) -> bool:

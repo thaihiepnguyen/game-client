@@ -59,6 +59,7 @@ class CharacterAnimation(ABC):
         This method should be implemented by subclasses to load specific animations.
         """
         return {
+            "walk": self._load_walk_animation(),
             "run": self._load_run_animation(),
             "jump": self._load_jump_animation(),
             "idle": self._load_idle_animation(),
@@ -72,6 +73,14 @@ class CharacterAnimation(ABC):
         """
         Load the run animation frames.
         :return: An Animation object for the run action.
+        """
+        pass
+    
+    @abstractmethod
+    def _load_walk_animation(self) -> Animation:
+        """
+        Load the walk animation frames.
+        :return: An Animation object for the walk action.
         """
         pass
 

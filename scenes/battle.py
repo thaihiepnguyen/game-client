@@ -1,9 +1,9 @@
 from typing import override
 
 from core.scene.scene import Scene
-from sprites.characters.warrior.warrior import Warrior
+from sprites.characters.yamabushi_tengu.yamabushi_tengu import YamabushiTengu
 from sprites.characters.samurai.samurai import Samurai
-from sprites.characters.warrior.warrior_animation import WarriorAnimation
+from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
 from sprites.characters.samurai.samurai_animation import SamuraiAnimation
 from sprites.backgrounds.street.street_animation import StreetAnimation
 
@@ -20,17 +20,17 @@ class BattleScene(Scene):
             animation=SamuraiAnimation(),
             speed=300, 
             weight=1,
-            jump_velocity=32,
+            jump_velocity=38,
             atk=10
         )
         self.__health_bar_tl = HealthBar(
             'topleft',
             self.__fighter
         )
-        self.__opponent = Warrior(
+        self.__opponent = YamabushiTengu(
             x=500, 
             y=200,
-            animation=WarriorAnimation(),
+            animation=YamabushiTenguAnimation(),
             speed=300, 
             weight=1,
             jump_velocity=30,
@@ -73,8 +73,14 @@ class BattleScene(Scene):
 
         keys = pygame.key.get_pressed()
 
+        if keys[pygame.K_LEFT] and keys[pygame.K_LSHIFT]:
+            self.__fighter.run(screen, -self.__fighter.get_speed() * delta_time * 1.5)
+            return
+        if keys[pygame.K_RIGHT] and keys[pygame.K_LSHIFT]:
+            self.__fighter.run(screen, self.__fighter.get_speed() * delta_time * 1.5)
+            return
         if keys[pygame.K_LEFT]:
-            self.__fighter.move(screen, -self.__fighter.get_speed() * delta_time) # each frame move speed * delta_time pixels
+            self.__fighter.move(screen, -self.__fighter.get_speed() * delta_time)
         if keys[pygame.K_RIGHT]:
             self.__fighter.move(screen, self.__fighter.get_speed() * delta_time)
         if keys[pygame.K_z]:

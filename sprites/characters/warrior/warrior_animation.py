@@ -11,7 +11,6 @@ class WarriorAnimation(CharacterAnimation):
             w=162,
             h=162,
             count=8,
-            scale=4
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
@@ -22,7 +21,6 @@ class WarriorAnimation(CharacterAnimation):
             w=162,
             h=162,
             count=3,
-            scale=4
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
@@ -33,7 +31,6 @@ class WarriorAnimation(CharacterAnimation):
             w=162,
             h=162,
             count=10,
-            scale=4
         )
         return Animation(sprite=sprite, frame_duration=0.05)
 
@@ -44,7 +41,6 @@ class WarriorAnimation(CharacterAnimation):
             w=162,
             h=162,
             count=7,
-            scale=4
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
@@ -55,7 +51,6 @@ class WarriorAnimation(CharacterAnimation):
             w=162,
             h=162,
             count=3,
-            scale=4
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
@@ -66,6 +61,5 @@ class WarriorAnimation(CharacterAnimation):
             w=162,
             h=162,
             count=7,
-            scale=4
         )
         return Animation(sprite=sprite, frame_duration=0.1)

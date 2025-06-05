@@ -1,15 +1,15 @@
 from typing import override
 
 from core.character.character import Character
-from sprites.characters.samurai.samurai_animation import SamuraiAnimation
+from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
 from core.const import WINDOW_HEIGHT
 
 import pygame
 
-class Samurai(Character):
-    def __init__(self, x: float, y: float, animation: SamuraiAnimation, speed: float, atk: float, weight: float = 1, jump_velocity: float = 30):
+class YamabushiTengu(Character):
+    def __init__(self, x: float, y: float, animation: YamabushiTenguAnimation, speed: float, atk: float, weight: float = 1, jump_velocity: float = 30):
         super().__init__(x, y, animation, speed, weight, jump_velocity, atk)
-        self.__scale = 2.5
+        self.__scale = 2.2
 
     @override
     def draw(self, screen: pygame.Surface, debug: bool=False) -> None:

@@ -13,6 +13,7 @@ class Animation:
         self.__frame_duration = frame_duration
         self.__current_frame_index = 0
         self.__time_since_last_frame = 0.0
+        self.__scale = 1
 
     def update(self, delta_time: float):
         """Update the animation based on the elapsed time."""
@@ -32,7 +33,15 @@ class Animation:
             dark_overlay = pygame.Surface(frame.get_size(), pygame.SRCALPHA)
             dark_overlay.fill((0, 0, 0, darken))
             frame.blit(dark_overlay, (0, 0))
-        return frame
+    
+        scaled_frame = pygame.transform.scale(frame, (self.__sprite.get_width() * self.__scale, self.__sprite.get_height() * self.__scale))
+        return scaled_frame
+    
+    def set_scale(self, scale):
+        self.__scale = scale
+
+    def get_scale(self):
+        return self.__scale
 
     def reset(self):
         """Reset the animation to the first frame."""
