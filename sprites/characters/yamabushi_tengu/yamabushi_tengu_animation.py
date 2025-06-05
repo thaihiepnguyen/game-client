@@ -23,7 +23,7 @@ class YamabushiTenguAnimation(CharacterAnimation):
             h=128,
             count=15,
         )
-        return Animation(sprite=sprite, frame_duration=0.1)
+        return Animation(sprite=sprite, frame_duration=0.04)
 
     @override
     def _load_idle_animation(self) -> Animation:

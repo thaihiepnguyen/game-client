@@ -35,13 +35,13 @@ class YamabushiTengu(Character):
 
 
     def _set_speed(self) -> float:
-        return 600
+        return 300
 
     def _set_weight(self) -> float:
         return 1
 
     def _set_jump_velocity(self) -> float:
-        return 33
+        return 34
 
     def _set_atk(self) -> float:
         return 10
