@@ -38,7 +38,7 @@ class HealthBar:
             fill_x = x
 
 
-        # Draw background bar
+        # Draw backgrounds bar
         pygame.draw.rect(screen, (80, 0, 0), (x, y, bar_width, bar_height), 0, self.__radius)
         # Draw health fill
         pygame.draw.rect(screen, (0, 255, 0), (fill_x, y, current_width, bar_height),0, self.__radius if ratio == 1 else 0)

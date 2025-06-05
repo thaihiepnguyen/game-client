@@ -13,21 +13,21 @@ class BackgroundAnimation(ABC):
         return self._groud_y_ratio
 
     @abstractmethod
-    def _set_ground_y_ratio(self):
+    def _set_ground_y_ratio(self) -> float:
         pass
 
     @abstractmethod
     def _load_animation(self) -> Animation:
         """
-        Load the background animation frames.
-        This method should be implemented by subclasses to load specific background animations.
-        :return: A pygame.Surface object representing the background animation.
+        Load the backgrounds animation frames.
+        This method should be implemented by subclasses to load specific backgrounds animations.
+        :return: A pygame.Surface object representing the backgrounds' animation.
         """
         pass
 
     def update(self, delta_time: float) -> None:
         """
-        Update the background animation based on the elapsed time.
+        Update the backgrounds animation based on the elapsed time.
         :param delta_time: The time elapsed since the last update in seconds.
         :return:
         """

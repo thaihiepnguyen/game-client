@@ -8,7 +8,7 @@ class TempleAnimation(BackgroundAnimation):
     @override
     def _load_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/background/temple/bg.png",
+            dir="assets/images/backgrounds/temple/bg.png",
             w=768,
             h=368,
             count=8,

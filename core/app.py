@@ -32,7 +32,7 @@ class Application:
                 if event.type == pygame.VIDEORESIZE:
                     self.__screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-            # Draw background
+            # Draw backgrounds
             scene.draw(self.__screen)
 
             # Update the scene

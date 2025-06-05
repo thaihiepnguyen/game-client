@@ -12,20 +12,17 @@ from sprites.characters.samurai.samurai_animation import SamuraiAnimation
 from sprites.backgrounds.street.street_animation import StreetAnimation
 
 from sprites.health_bar import HealthBar
+from core.const import WINDOW_WIDTH
 import pygame
 
 class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
-        self.__bg_animation = StreetAnimation()
+        self.__bg_animation = CountrysideAnimation()
         self.__fighter = Samurai(
             x=100, 
             y=200,
             animation=SamuraiAnimation(),
-            speed=300, 
-            weight=1,
-            jump_velocity=30,
-            atk=10
         )
         self.__health_bar_tl = HealthBar(
             'topleft',
@@ -35,10 +32,6 @@ class BattleScene(Scene):
             x=500, 
             y=200,
             animation=YamabushiTenguAnimation(),
-            speed=300, 
-            weight=1,
-            jump_velocity=30,
-            atk=6
         )
         self.__health_bar_tr = HealthBar(
             'topright',
@@ -58,7 +51,15 @@ class BattleScene(Scene):
 
     @override
     def handle_event(self, event: pygame.event.Event):
-        pass
+        if event.type == pygame.VIDEORESIZE:
+            width, height = event.w, event.h
+            ratio = (width / WINDOW_WIDTH)
+            self.__fighter.set_speed(self.__fighter.get_speed() * ratio)
+            self.__opponent.set_speed(self.__opponent.get_speed() * ratio)
+            self.__fighter.set_weight(self.__fighter.get_weight() * ratio)
+            self.__opponent.set_weight(self.__opponent.get_weight() * ratio)
+            self.__fighter.set_jump_velocity(self.__fighter.get_jump_velocity() * ratio)
+            self.__opponent.set_jump_velocity(self.__opponent.get_jump_velocity() * ratio)
 
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
@@ -78,9 +79,11 @@ class BattleScene(Scene):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_LEFT]:
-            self.__fighter.move(screen, -self.__fighter.get_speed() * delta_time)
+            dx = self.__fighter.get_speed() * delta_time
+            self.__fighter.move(screen, -dx)
         if keys[pygame.K_RIGHT]:
-            self.__fighter.move(screen, self.__fighter.get_speed() * delta_time)
+            dx = self.__fighter.get_speed() * delta_time
+            self.__fighter.move(screen, dx)
         if keys[pygame.K_z]:
             self.__fighter.attack(screen, self.__opponent)
         if keys[pygame.K_SPACE]:

@@ -1,17 +1,15 @@
 import pygame
 from abc import ABC, abstractmethod
-from core.const import ATTACK_COOLDOWN, GRAVITY, LOCK_FPS
+from core.const import ATTACK_COOLDOWN, GRAVITY, LOCK_FPS, WINDOW_HEIGHT
 from core.character.character_animation import CharacterAnimation
 
 class Character(ABC):
-    def __init__(self, x: float, y: float, character_animation: CharacterAnimation, speed: float, weight: float, jump_velocity: float, atk: float):
-        if speed < 0 or weight <= 0 or jump_velocity < 0 or atk < 0:
-            raise ValueError("Speed, weight, jump_velocity, and atk must be non-negative.")
-
+    def __init__(self, x: float, y: float, character_animation: CharacterAnimation):
         # Health attributes
         self._max_hp = 100
         self._current_hp = self._max_hp
-        self._atk = atk
+        self._atk = self._set_atk()
+        self._armor = self._set_armor()
 
         # Attack cooldown
         self._last_attack_time = 0
@@ -19,9 +17,9 @@ class Character(ABC):
         # Movement attributes
         self._rect = pygame.Rect(x, y, 0, 0)
         self._velocity_y = 0.0
-        self._speed = speed
-        self._weight = weight
-        self._jump_velocity = jump_velocity
+        self._speed = self._set_speed()
+        self._weight = self._set_weight()
+        self._jump_velocity = self._set_jump_velocity()
         self._moving = False
         self._attacking = False
         self._flipped = False
@@ -30,6 +28,46 @@ class Character(ABC):
         # Animation setup
         self._character_animation = character_animation
 
+        if self._speed < 0 or self._weight <= 0 or self._jump_velocity < 0 or self._atk < 0:
+            raise ValueError("Speed, weight, jump_velocity, and atk must be non-negative.")
+
+    def set_speed(self, speed):
+        self._speed = speed
+
+    def set_weight(self, weight):
+        self._weight = weight
+
+    def set_jump_velocity(self, jump_velocity):
+        self._jump_velocity = jump_velocity
+
+    def get_speed(self) -> float:
+        return self._speed
+
+    def get_weight(self) -> float:
+        return self._weight
+
+    def get_jump_velocity(self) -> float:
+        return self._jump_velocity
+
+    @abstractmethod
+    def _set_speed(self) -> float:
+        pass
+
+    @abstractmethod
+    def _set_weight(self) -> float:
+        pass
+
+    @abstractmethod
+    def _set_jump_velocity(self) -> float:
+        pass
+
+    @abstractmethod
+    def _set_atk(self) -> float:
+        pass
+
+    @abstractmethod
+    def _set_armor(self) -> float:
+        pass
 
     @abstractmethod
     def draw(self, screen: pygame.Surface, debug: bool = False) -> None:
@@ -45,7 +83,12 @@ class Character(ABC):
         self._rect.width = rect_w
 
         if self._velocity_y == 0.0:
-            shadow_rect = pygame.Rect(self._rect.centerx - 30, self._rect.bottom - 10, 90, 20)
+            shadow_rect = pygame.Rect(
+                self._rect.x - 10,
+                self._rect.bottom - 10,
+                self._rect.width * 1.2,
+                self._rect.height * 0.1
+            )
             pygame.draw.ellipse(screen, (0, 0, 0, 80), shadow_rect)
 
     @abstractmethod
@@ -85,6 +128,7 @@ class Character(ABC):
 
         self._moving = dx != 0
         self._rect.x += dx
+        # ensure character is always in screen
         self._rect.clamp_ip(screen.get_rect())
 
     def jump(self) -> None:
@@ -92,20 +136,23 @@ class Character(ABC):
         if self._velocity_y == 0.0:  # Only jump if on ground
             self._velocity_y = -self._jump_velocity * LOCK_FPS
 
-    def attack(self, screen: pygame.Surface, opponent: "Character", debug: bool = False) -> None:
+    def attack(self, screen: pygame.Surface, opponent: "Character", debug: bool = True) -> None:
         """Attack an opponent if cooldown allows."""
-        if not self._can_attack() or self._velocity_y != 0.0:
+        if not self._can_attack():
             return
 
         self._attacking = True
         self._last_attack_time = pygame.time.get_ticks()
 
-        attack_width = 2 * self._rect.width
+        attack_width = 1.8 * self._rect.width
+        attack_height = 0.3 * self._rect.height
         attack_x = self._rect.centerx - attack_width if self._flipped else self._rect.centerx
-        attacking_rect = pygame.Rect(attack_x, self._rect.y, attack_width, self._rect.height)
+        attacking_rect = pygame.Rect(attack_x, self._rect.y + 20, attack_width, attack_height)
 
         if attacking_rect.colliderect(opponent._rect) and opponent.get_hp() > 0:
-            opponent.take_damage(self)
+            intersection = attacking_rect.clip(opponent._rect)
+            ratio = intersection.width / opponent._rect.width
+            opponent.take_damage(self, ratio)
 
         if debug:
             pygame.draw.rect(screen, (255, 0, 0), attacking_rect)
@@ -114,10 +161,10 @@ class Character(ABC):
         """Flip the character to face the opponent."""
         self._flipped = self._rect.centerx > opponent._rect.centerx
 
-    def take_damage(self, opponent: "Character") -> None:
+    def take_damage(self, opponent: "Character", ratio: float = 1) -> None:
         """Reduce HP based on opponent's attack."""
         self._taking_damage = True
-        self._current_hp = max(0, self._current_hp - opponent.get_atk())
+        self._current_hp = max(0, self._current_hp - (opponent.get_atk() - self._armor) * ratio)
 
     def idle(self) -> None:
         """Set the character to idle state."""
@@ -138,9 +185,6 @@ class Character(ABC):
     def is_dead(self) -> bool:
         """Check if the character is dead."""
         return self._current_hp <= 0
-    
-    def get_speed(self) -> float:
-        return self._speed
 
     def _determine_action(self) -> str:
         """Determine the current action based on state."""
@@ -148,10 +192,10 @@ class Character(ABC):
             return 'death'
         if self._taking_damage:
             return 'hit'
-        if self._velocity_y != 0.0:
-            return 'jump'
         if self._attacking:
             return 'atk'
+        if self._velocity_y != 0.0:
+            return 'jump'
         if self._moving:
             return 'walk'
         return 'idle'

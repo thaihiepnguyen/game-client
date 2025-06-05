@@ -8,7 +8,7 @@ class BridgeAnimation(BackgroundAnimation):
     @override
     def _load_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/background/bridge/bg.png",
+            dir="assets/images/backgrounds/bridge/bg.png",
             w=952,
             h=416,
             count=8,

@@ -10,7 +10,7 @@ class TokyoAnimation(BackgroundAnimation):
     @override
     def _load_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/background/tokyo/bg.png",
+            dir="assets/images/backgrounds/tokyo/bg.png",
             w=800,
             h=336,
             count=8,

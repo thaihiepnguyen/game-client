@@ -9,7 +9,7 @@ LOCK_FPS = 60
 GRAVITY = 2 * pow(LOCK_FPS, 2) # converted to per frame
 
 # Constants for asset paths
-BACKGROUND_IMAGE = "assets/images/background/background.jpg"
+BACKGROUND_IMAGE = "assets/images/backgrounds/backgrounds.jpg"
 
 # Constants for scene management
 MAIN_MENU_SCENE = "main_menu"

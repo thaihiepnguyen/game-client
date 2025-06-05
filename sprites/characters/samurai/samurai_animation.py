@@ -8,7 +8,7 @@ class SamuraiAnimation(CharacterAnimation):
     @override
     def _load_walk_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/samurai/Sprites/Walk.png",
+            dir="assets/images/characters/samurai/Sprites/Walk.png",
             w=128,
             h=128,
             count=9,
@@ -18,7 +18,7 @@ class SamuraiAnimation(CharacterAnimation):
     @override
     def _load_jump_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/samurai/Sprites/Jump.png",
+            dir="assets/images/characters/samurai/Sprites/Jump.png",
             w=128,
             h=128,
             count=7,
@@ -28,7 +28,7 @@ class SamuraiAnimation(CharacterAnimation):
     @override
     def _load_idle_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/samurai/Sprites/Idle.png",
+            dir="assets/images/characters/samurai/Sprites/Idle.png",
             w=128,
             h=128,
             count=5,
@@ -38,7 +38,7 @@ class SamuraiAnimation(CharacterAnimation):
     @override
     def _load_attack_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/samurai/Sprites/Attack_1.png",
+            dir="assets/images/characters/samurai/Sprites/Attack_1.png",
             w=128,
             h=128,
             count=4,
@@ -48,7 +48,7 @@ class SamuraiAnimation(CharacterAnimation):
     @override
     def _load_hit_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/samurai/Sprites/Hurt.png",
+            dir="assets/images/characters/samurai/Sprites/Hurt.png",
             w=128,
             h=128,
             count=2,
@@ -58,7 +58,7 @@ class SamuraiAnimation(CharacterAnimation):
     @override
     def _load_death_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/samurai/Sprites/Dead.png",
+            dir="assets/images/characters/samurai/Sprites/Dead.png",
             w=128,
             h=128,
             count=6,

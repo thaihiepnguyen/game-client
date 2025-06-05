@@ -8,7 +8,7 @@ class YamabushiTenguAnimation(CharacterAnimation):
     @override
     def _load_walk_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/yamabushi_tengu/Sprites/Walk.png",
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Walk.png",
             w=128,
             h=128,
             count=8,
@@ -18,7 +18,7 @@ class YamabushiTenguAnimation(CharacterAnimation):
     @override
     def _load_jump_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/yamabushi_tengu/Sprites/Jump.png",
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Jump.png",
             w=128,
             h=128,
             count=15,
@@ -28,7 +28,7 @@ class YamabushiTenguAnimation(CharacterAnimation):
     @override
     def _load_idle_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/yamabushi_tengu/Sprites/Idle_2.png",
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Idle_2.png",
             w=128,
             h=128,
             count=5,
@@ -38,7 +38,7 @@ class YamabushiTenguAnimation(CharacterAnimation):
     @override
     def _load_attack_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/yamabushi_tengu/Sprites/Attack_2.png",
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Attack_2.png",
             w=128,
             h=128,
             count=6,
@@ -48,17 +48,17 @@ class YamabushiTenguAnimation(CharacterAnimation):
     @override
     def _load_hit_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/yamabushi_tengu/Sprites/Hurt.png",
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Idle.png",
             w=128,
             h=128,
-            count=3,
+            count=6,
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
     @override
     def _load_death_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/yamabushi_tengu/Sprites/Dead.png",
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Dead.png",
             w=128,
             h=128,
             count=6,

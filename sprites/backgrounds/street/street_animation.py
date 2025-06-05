@@ -8,7 +8,7 @@ class StreetAnimation(BackgroundAnimation):
     @override
     def _load_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/background/street/bg.png",
+            dir="assets/images/backgrounds/street/bg.png",
             w=640,
             h=324,
             count=8,

@@ -8,7 +8,7 @@ class CountrysideAnimation(BackgroundAnimation):
     @override
     def _load_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/background/countryside/bg.png",
+            dir="assets/images/backgrounds/countryside/bg.png",
             w=768,
             h=384,
             count=24,
