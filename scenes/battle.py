@@ -18,15 +18,15 @@ import pygame
 class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
-        self.__bg_animation = CountrysideAnimation()
+        self.__bg_animation = TokyoAnimation()
         self.__fighter = YamabushiTengu(
             x=100, 
             y=200,
             animation=YamabushiTenguAnimation(),
         )
         self.__health_bar_tl = HealthBar(
-            'topleft',
-            self.__fighter
+            pos='topleft',
+            character=self.__fighter
         )
         self.__opponent = Samurai(
             x=500, 
@@ -34,8 +34,8 @@ class BattleScene(Scene):
             animation=SamuraiAnimation(),
         )
         self.__health_bar_tr = HealthBar(
-            'topright',
-            self.__opponent
+            pos='topright',
+            character=self.__opponent
         )
 
     @override
