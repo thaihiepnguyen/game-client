@@ -7,6 +7,14 @@ from core.animation.animation import Animation
 class BackgroundAnimation(ABC):
     def __init__(self):
         self.__animation: Animation = self._load_animation()
+        self._groud_y_ratio = self._set_ground_y_ratio()
+
+    def get_ground_y_ratio(self):
+        return self._groud_y_ratio
+
+    @abstractmethod
+    def _set_ground_y_ratio(self):
+        pass
 
     @abstractmethod
     def _load_animation(self) -> Animation:

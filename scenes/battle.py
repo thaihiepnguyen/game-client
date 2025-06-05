@@ -1,6 +1,10 @@
 from typing import override
 
 from core.scene.scene import Scene
+from sprites.backgrounds.bridge.bridge_animation import BridgeAnimation
+from sprites.backgrounds.countryside.countryside_animation import CountrysideAnimation
+from sprites.backgrounds.temple.temple_animation import TempleAnimation
+from sprites.backgrounds.tokyo.tokyo_animation import TokyoAnimation
 from sprites.characters.yamabushi_tengu.yamabushi_tengu import YamabushiTengu
 from sprites.characters.samurai.samurai import Samurai
 from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
@@ -14,10 +18,10 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = StreetAnimation()
-        self.__fighter = Samurai(
+        self.__fighter = YamabushiTengu(
             x=100, 
             y=200,
-            animation=SamuraiAnimation(),
+            animation=YamabushiTenguAnimation(),
             speed=300, 
             weight=1,
             jump_velocity=38,
@@ -60,7 +64,7 @@ class BattleScene(Scene):
     def update(self, screen: pygame.Surface, delta_time: float):
         self.__bg_animation.update(delta_time)
 
-        ground_y = screen.get_height() * 4.5 / 5
+        ground_y = screen.get_height() * self.__bg_animation.get_ground_y_ratio()
         self.__fighter.apply_gravity(ground_y, delta_time)
         self.__opponent.apply_gravity(ground_y, delta_time)
 

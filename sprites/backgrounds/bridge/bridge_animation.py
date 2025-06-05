@@ -4,17 +4,17 @@ from core.background.background_animation import BackgroundAnimation
 from typing import override
 
 
-class StreetAnimation(BackgroundAnimation):
+class BridgeAnimation(BackgroundAnimation):
     @override
     def _load_animation(self) -> Animation:
         sprite = Sprite(
-            dir="assets/images/background/street/bg.png",
-            w=640,
-            h=324,
+            dir="assets/images/background/bridge/bg.png",
+            w=952,
+            h=416,
             count=8,
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
     @override
     def _set_ground_y_ratio(self):
-        return 4.7 / 5
+        return 4.3 / 5

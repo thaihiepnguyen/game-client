@@ -1,8 +1,6 @@
 import pygame
 from abc import ABC, abstractmethod
 from core.const import ATTACK_COOLDOWN, GRAVITY, LOCK_FPS
-from enum import Enum
-
 from core.character.character_animation import CharacterAnimation
 
 class Character(ABC):
@@ -92,6 +90,8 @@ class Character(ABC):
 
     def run(self, screen: pygame.Surface, dx: float) -> None:
         """Move the character horizontally within screen bounds."""
+        if (dx < 0 and not self._flipped) or (dx > 0 and self._flipped):
+            return
         if self._attacking:
             return
 
