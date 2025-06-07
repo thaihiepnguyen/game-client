@@ -14,7 +14,7 @@ class Character(ABC):
         # Attack cooldown
         self._last_attack_time = 0
 
-        # Movement attributes
+        # Movement / Action attributes
         self._rect = pygame.Rect(x, y, 0, 0)
         self._shadow_rect = pygame.Rect(x, y, 0, 0)
         self._velocity_y = 0.0
@@ -25,6 +25,7 @@ class Character(ABC):
         self._attacking = False
         self._flipped = False
         self._taking_damage = False
+        self._is_on_defense = False
         self._scale = 1
 
         # Animation setup
@@ -92,7 +93,6 @@ class Character(ABC):
         self._rect.height = rect_h
         self._rect.width = rect_w
 
-        screen.blit(image, (offset_x, offset_y))
         if self._velocity_y == 0.0:
             self._shadow_rect.x = self._rect.x
             self._shadow_rect.y = self._rect.bottom - 10
@@ -101,6 +101,7 @@ class Character(ABC):
 
             pygame.draw.ellipse(screen, (0, 0, 0, 80), self._shadow_rect)
 
+        screen.blit(image, (offset_x, offset_y))
     @abstractmethod
     def update(self, screen: pygame.Surface, delta_time: float) -> None:
         """
@@ -133,7 +134,7 @@ class Character(ABC):
 
     def move(self, screen: pygame.Surface, dx: float) -> None:
         """Move the character horizontally within screen bounds."""
-        if self._attacking:
+        if self._attacking or self._is_on_defense:
             return
 
         self._moving = dx != 0
@@ -143,10 +144,16 @@ class Character(ABC):
 
     def jump(self) -> None:
         """Make the character jump if on the ground."""
-        if self._velocity_y == 0.0:  # Only jump if on ground
+        if self._velocity_y == 0.0 and not self._is_on_defense:  # Only jump if on ground
             self._velocity_y = -self._jump_velocity * LOCK_FPS
 
-    def attack(self, screen: pygame.Surface, opponent: "Character", debug: bool = True) -> None:
+    def set_defense(self, is_on_defense: bool) -> None:
+        self._is_on_defense = is_on_defense
+
+    def is_on_defense(self) -> bool:
+        return self._is_on_defense
+
+    def attack(self, screen: pygame.Surface, opponent: "Character", debug: bool = False) -> None:
         """Attack an opponent if cooldown allows."""
         if not self._can_attack():
             return
@@ -157,9 +164,13 @@ class Character(ABC):
         attack_width = 1.8 * self._rect.width
         attack_height = 0.3 * self._rect.height
         attack_x = self._rect.centerx - attack_width if self._flipped else self._rect.centerx
-        attacking_rect = pygame.Rect(attack_x, self._rect.y + 20, attack_width, attack_height)
+        attack_y = self._rect.y + 20 * screen.get_height() / WINDOW_HEIGHT
+
+        attacking_rect = pygame.Rect(attack_x, attack_y, attack_width, attack_height)
 
         if attacking_rect.colliderect(opponent._rect) and opponent.get_hp() > 0:
+            if opponent.is_on_defense():
+                return
             intersection = attacking_rect.clip(opponent._rect)
             ratio = intersection.width / opponent._rect.width
             opponent.take_damage(self, ratio)
@@ -208,6 +219,8 @@ class Character(ABC):
             return 'atk'
         if self._velocity_y != 0.0:
             return 'jump'
+        if self._is_on_defense:
+            return 'def'
         if self._moving:
             return 'walk'
         return 'idle'

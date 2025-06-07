@@ -64,3 +64,13 @@ class SamuraiAnimation(CharacterAnimation):
             count=6,
         )
         return Animation(sprite=sprite, frame_duration=0.1)
+
+    @override
+    def _load_def_animation(self) -> Animation | None:
+        sprite = Sprite(
+            dir="assets/images/characters/samurai/Sprites/Protect.png",
+            w=128,
+            h=128,
+            count=1,
+        )
+        return Animation(sprite=sprite, frame_duration=0.1)

@@ -21,10 +21,10 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = TokyoAnimation()
-        self.__fighter = Archer(
+        self.__fighter = Samurai(
             x=100, 
             y=200,
-            animation=ArcherAnimation(),
+            animation=SamuraiAnimation(),
         )
         self.__health_bar_tl = HealthBar(
             pos='topleft',
@@ -53,6 +53,14 @@ class BattleScene(Scene):
 
     @override
     def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LSHIFT:
+                self.__fighter.set_defense(True)
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LSHIFT:
+                self.__fighter.set_defense(False)
+
         if event.type == pygame.VIDEORESIZE:
             width, height = event.w, event.h
             ratio = (width / WINDOW_WIDTH)

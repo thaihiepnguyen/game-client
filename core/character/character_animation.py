@@ -18,6 +18,8 @@ class CharacterAnimation(ABC):
         if self.__stop_update:
             return
         if action_type in self.__animations:
+            if self.__animations[action_type] is None:
+                return
             if self.__current_action != action_type:
                 self.__animations[self.__current_action].reset()
                 self.__current_action = action_type
@@ -64,9 +66,10 @@ class CharacterAnimation(ABC):
             "idle": self._load_idle_animation(),
             "atk": self._load_attack_animation(),
             "hit": self._load_hit_animation(),
-            "death": self._load_death_animation()
+            "death": self._load_death_animation(),
+            "def": self._load_def_animation(),
         }
-    
+
     @abstractmethod
     def _load_walk_animation(self) -> Animation:
         """
@@ -112,5 +115,13 @@ class CharacterAnimation(ABC):
         """
         Load the death animation frames.
         :return: An Animation object for the death action.
+        """
+        pass
+
+    @abstractmethod
+    def _load_def_animation(self) -> Animation | None:
+        """
+        Load the defense animation frames.
+        :return: An Animation object for the defense action.
         """
         pass

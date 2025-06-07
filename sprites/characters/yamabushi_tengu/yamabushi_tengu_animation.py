@@ -64,3 +64,7 @@ class YamabushiTenguAnimation(CharacterAnimation):
             count=6,
         )
         return Animation(sprite=sprite, frame_duration=0.1)
+
+    @override
+    def _load_def_animation(self) -> Animation | None:
+        return None
