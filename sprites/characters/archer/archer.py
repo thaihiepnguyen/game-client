@@ -32,4 +32,4 @@ class Archer(Character):
         return 10
 
     def _set_armor(self) -> float:
-        return 2
+        return 1
