@@ -5,7 +5,7 @@ from typing import Dict
 
 class CharacterAnimation(ABC):
     def __init__(self):
-        self.__animations: Dict[str, Animation] = self._load_animations()
+        self.__animations: Dict[str, Animation | None] = self._load_animations()
         self.__current_action: str = "idle"
         self.__stop_update: bool = False
 
@@ -18,9 +18,7 @@ class CharacterAnimation(ABC):
         if self.__stop_update:
             return
         if action_type in self.__animations:
-            if self.__animations[action_type] is None:
-                return
-            if self.__current_action != action_type:
+            if self.__current_action != action_type and self.__animations[action_type] is not None:
                 self.__animations[self.__current_action].reset()
                 self.__current_action = action_type
             self.__animations[self.__current_action].update(delta_time)

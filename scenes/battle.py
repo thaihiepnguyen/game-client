@@ -21,19 +21,19 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = TokyoAnimation()
-        self.__fighter = Samurai(
+        self.__fighter = YamabushiTengu(
             x=100, 
             y=200,
-            animation=SamuraiAnimation(),
+            animation=YamabushiTenguAnimation(),
         )
         self.__health_bar_tl = HealthBar(
             pos='topleft',
             character=self.__fighter
         )
-        self.__opponent = YamabushiTengu(
+        self.__opponent = Samurai(
             x=500, 
             y=200,
-            animation=YamabushiTenguAnimation(),
+            animation=SamuraiAnimation(),
         )
         self.__health_bar_tr = HealthBar(
             pos='topright',

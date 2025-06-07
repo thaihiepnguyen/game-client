@@ -43,7 +43,7 @@ class YamabushiTenguAnimation(CharacterAnimation):
             h=128,
             count=6,
         )
-        return Animation(sprite=sprite, frame_duration=0.1)
+        return Animation(sprite=sprite, frame_duration=0.05)
 
     @override
     def _load_hit_animation(self) -> Animation:
