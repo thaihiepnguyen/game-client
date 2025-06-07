@@ -16,6 +16,7 @@ class Character(ABC):
 
         # Movement attributes
         self._rect = pygame.Rect(x, y, 0, 0)
+        self._shadow_rect = pygame.Rect(x, y, 0, 0)
         self._velocity_y = 0.0
         self._speed = self._set_speed()
         self._weight = self._set_weight()
@@ -24,6 +25,7 @@ class Character(ABC):
         self._attacking = False
         self._flipped = False
         self._taking_damage = False
+        self._scale = 1
 
         # Animation setup
         self._character_animation = character_animation
@@ -69,27 +71,35 @@ class Character(ABC):
     def _set_armor(self) -> float:
         pass
 
-    @abstractmethod
     def draw(self, screen: pygame.Surface, debug: bool = False) -> None:
         """
         Draw the character on the current screen surface.
         :param screen: The screen surface to draw on.
         :param debug:
         """
+        if debug:
+            pygame.draw.rect(screen, (255, 0, 0), self._rect)
+
+        image = self._character_animation.get_current_frame(self._flipped)
+
+        self._character_animation.get_current_animation().set_scale(self._scale)
+
+        offset_x = self._rect.centerx - image.get_width() / 2
+        offset_y = self._rect.bottom - image.get_height()
         
         rect_h = screen.get_height() * 1 / 3
         rect_w = rect_h * 1.3 / 3
         self._rect.height = rect_h
         self._rect.width = rect_w
 
+        screen.blit(image, (offset_x, offset_y))
         if self._velocity_y == 0.0:
-            shadow_rect = pygame.Rect(
-                self._rect.x - 10,
-                self._rect.bottom - 10,
-                self._rect.width * 1.2,
-                self._rect.height * 0.1
-            )
-            pygame.draw.ellipse(screen, (0, 0, 0, 80), shadow_rect)
+            self._shadow_rect.x = self._rect.x
+            self._shadow_rect.y = self._rect.bottom - 10
+            self._shadow_rect.width = self._rect.width * 1.2
+            self._shadow_rect.height = self._rect.height * 0.1
+
+            pygame.draw.ellipse(screen, (0, 0, 0, 80), self._shadow_rect)
 
     @abstractmethod
     def update(self, screen: pygame.Surface, delta_time: float) -> None:

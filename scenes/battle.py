@@ -5,6 +5,8 @@ from sprites.backgrounds.bridge.bridge_animation import BridgeAnimation
 from sprites.backgrounds.countryside.countryside_animation import CountrysideAnimation
 from sprites.backgrounds.temple.temple_animation import TempleAnimation
 from sprites.backgrounds.tokyo.tokyo_animation import TokyoAnimation
+from sprites.characters.archer.archer import Archer
+from sprites.characters.archer.archer_animation import ArcherAnimation
 from sprites.characters.yamabushi_tengu.yamabushi_tengu import YamabushiTengu
 from sprites.characters.samurai.samurai import Samurai
 from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
@@ -19,19 +21,19 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = TokyoAnimation()
-        self.__fighter = YamabushiTengu(
+        self.__fighter = Archer(
             x=100, 
             y=200,
-            animation=YamabushiTenguAnimation(),
+            animation=ArcherAnimation(),
         )
         self.__health_bar_tl = HealthBar(
             pos='topleft',
             character=self.__fighter
         )
-        self.__opponent = Samurai(
+        self.__opponent = YamabushiTengu(
             x=500, 
             y=200,
-            animation=SamuraiAnimation(),
+            animation=YamabushiTenguAnimation(),
         )
         self.__health_bar_tr = HealthBar(
             pos='topright',

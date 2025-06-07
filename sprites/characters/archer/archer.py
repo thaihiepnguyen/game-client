@@ -1,13 +1,14 @@
 from typing import override
 
 from core.character.character import Character
-from sprites.characters.samurai.samurai_animation import SamuraiAnimation
+from sprites.characters.archer.archer_animation import ArcherAnimation
 from core.const import WINDOW_HEIGHT
 
 import pygame
 
-class Samurai(Character):
-    def __init__(self, x: float, y: float, animation: SamuraiAnimation):
+
+class Archer(Character):
+    def __init__(self, x: float, y: float, animation: ArcherAnimation):
         super().__init__(x, y, animation)
         self._scale = 2.5
 
@@ -25,7 +26,7 @@ class Samurai(Character):
         return 1
 
     def _set_jump_velocity(self) -> float:
-        return 33
+        return 30
 
     def _set_atk(self) -> float:
         return 10
