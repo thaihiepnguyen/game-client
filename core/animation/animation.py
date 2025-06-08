@@ -40,9 +40,6 @@ class Animation:
     def set_scale(self, scale):
         self.__scale = scale
 
-    def get_scale(self):
-        return self.__scale
-
     def reset(self):
         """Reset the animation to the first frame."""
         self.__current_frame_index = 0

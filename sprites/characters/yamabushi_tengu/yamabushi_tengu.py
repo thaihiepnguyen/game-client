@@ -2,7 +2,6 @@ from typing import override
 
 from core.character.character import Character
 from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
-from core.const import WINDOW_HEIGHT
 
 import pygame
 
@@ -14,9 +13,7 @@ class YamabushiTengu(Character):
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
         super().update(screen, delta_time)
-        self._character_animation.get_current_animation().set_scale(
-            self._scale * screen.get_height() / WINDOW_HEIGHT
-        )
+        self._character_animation.get_current_animation().set_scale(self._scale)
 
 
     def _set_speed(self) -> float:

@@ -1,8 +1,7 @@
 import pygame
 from abc import ABC, abstractmethod
-from core.const import ATTACK_COOLDOWN, GRAVITY, LOCK_FPS, WINDOW_HEIGHT
+from core.const import ATTACK_COOLDOWN, CHARACTER_HEIGHT, CHARACTER_WIDTH, Colors, GRAVITY, LOCK_FPS, SHADOW_HEIGHT, SHADOW_WIDTH, WINDOW_WIDTH
 from core.character.character_animation import CharacterAnimation
-
 
 class Character(ABC):
     def __init__(self, x: float, y: float, character_animation: CharacterAnimation):
@@ -29,9 +28,8 @@ class Character(ABC):
         self._last_attack_time = 0
 
         # --- Graphics & Hitboxes ---
-        self._scale = 1
-        self._rect = pygame.Rect(x, y, 0, 0)
-        self._shadow_rect = pygame.Rect(x, y, 0, 0)
+        self._rect = pygame.Rect(x, y, CHARACTER_WIDTH, CHARACTER_HEIGHT)
+        self._shadow_rect = pygame.Rect(x, y, SHADOW_WIDTH, SHADOW_HEIGHT)
         self._character_animation = character_animation
 
         # --- Sanity Check ---
@@ -55,23 +53,19 @@ class Character(ABC):
     def _set_armor(self) -> float: pass
 
     # --- Public Setters ---
-    def set_speed(self, speed: float): self._speed = speed
-    def set_weight(self, weight: float): self._weight = weight
-    def set_jump_velocity(self, jump_velocity: float): self._jump_velocity = jump_velocity
     def set_defense(self, is_on_defense: bool): self._is_on_defense = is_on_defense
 
     # --- Public Getters ---
+    def get_rect(self) -> float: return self._rect
     def get_hp(self) -> float: return self._current_hp
     def get_max_hp(self) -> float: return self._max_hp
     def get_atk(self) -> float: return self._atk
     def get_speed(self) -> float: return self._speed
-    def get_weight(self) -> float: return self._weight
-    def get_jump_velocity(self) -> float: return self._jump_velocity
     def is_on_defense(self) -> bool: return self._is_on_defense
     def is_dead(self) -> bool: return self._current_hp <= 0
 
     # --- Core Actions ---
-    def attack(self, screen: pygame.Surface, opponent: "Character", debug: bool = False) -> None:
+    def attack(self, opponent: "Character") -> None:
         if not self._can_attack():
             return
 
@@ -81,7 +75,7 @@ class Character(ABC):
         attack_w = 1.8 * self._rect.width
         attack_h = 0.3 * self._rect.height
         attack_x = self._rect.centerx - attack_w if self._flipped else self._rect.centerx
-        attack_y = self._rect.y + 20 * screen.get_height() / WINDOW_HEIGHT
+        attack_y = self._rect.y + 20
 
         attack_rect = pygame.Rect(attack_x, attack_y, attack_w, attack_h)
 
@@ -91,17 +85,12 @@ class Character(ABC):
                 damage_ratio = intersection.width / opponent._rect.width
                 opponent.take_damage(self, damage_ratio)
 
-        if debug:
-            pygame.draw.rect(screen, (255, 0, 0), attack_rect)
-
-    def move(self, screen: pygame.Surface, dx: float) -> None:
+    def move(self, dx: float) -> None:
         if self._attacking or self._is_on_defense:
             return
 
         self._moving = dx != 0
-        self._rect.x += dx
-
-        self._rect.clamp_ip(screen.get_rect())
+        self._rect.x = max(0, min(self._rect.x + dx, WINDOW_WIDTH - self._rect.width))
 
     def jump(self) -> None:
         if self._velocity_y == 0.0 and not self._is_on_defense:
@@ -126,17 +115,6 @@ class Character(ABC):
             self._rect.bottom = ground_y
             self._velocity_y = 0.0
 
-    # --- Update & Animation ---
-    @abstractmethod
-    def update(self, screen: pygame.Surface, delta_time: float) -> None:
-        action = self._determine_action()
-        self._character_animation.update(action, delta_time)
-
-        if self._character_animation.get_current_animation().is_complete():
-            if action == 'atk': self._attacking = False
-            if action == 'hit': self._taking_damage = False
-            if action == 'death': self._character_animation.stop_update()
-
     def _determine_action(self) -> str:
         if self._current_hp == 0: return 'death'
         if self._taking_damage: return 'hit'
@@ -149,26 +127,30 @@ class Character(ABC):
     def _can_attack(self) -> bool:
         return (pygame.time.get_ticks() - self._last_attack_time) >= ATTACK_COOLDOWN
 
+    # --- Update & Animation ---
+    @abstractmethod
+    def update(self, screen: pygame.Surface, delta_time: float) -> None:
+        action = self._determine_action()
+        self._character_animation.update(action, delta_time)
+
+        if self._character_animation.get_current_animation().is_complete():
+            if action == 'atk': self._attacking = False
+            if action == 'hit': self._taking_damage = False
+            if action == 'death': self._character_animation.stop_update()
+
     # --- Drawing ---
     def draw(self, screen: pygame.Surface, debug: bool = False) -> None:
         if debug:
-            pygame.draw.rect(screen, (255, 0, 0), self._rect)
+            pygame.draw.rect(screen, Colors.RED.value, self._rect)
 
         image = self._character_animation.get_current_frame(self._flipped)
-        self._character_animation.get_current_animation().set_scale(self._scale)
 
         offset_x = self._rect.centerx - image.get_width() / 2
         offset_y = self._rect.bottom - image.get_height()
 
-        # Recalculate rect size based on screen
-        self._rect.height = screen.get_height() / 3
-        self._rect.width = self._rect.height * 1.3 / 3
-
         if self._velocity_y == 0.0:
-            self._shadow_rect.x = self._rect.x
+            self._shadow_rect.centerx = self._rect.centerx
             self._shadow_rect.y = self._rect.bottom - 10
-            self._shadow_rect.width = self._rect.width * 1.2
-            self._shadow_rect.height = self._rect.height * 0.1
-            pygame.draw.ellipse(screen, (0, 0, 0, 80), self._shadow_rect)
+            pygame.draw.ellipse(screen, Colors.BLACK.value, self._shadow_rect)
 
         screen.blit(image, (offset_x, offset_y))

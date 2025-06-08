@@ -1,5 +1,6 @@
 import pygame
 from core.character.character import Character
+from core.const import WINDOW_HEIGHT, WINDOW_WIDTH
 
 
 
@@ -10,11 +11,9 @@ class HealthBar:
         self.__character = character
 
     def draw(self, screen: pygame.Surface):
-        screen_width, screen_height = screen.get_width(), screen.get_height()
-
         # Dynamic size: 40% of screen width, 5% of screen height
-        bar_width = int(screen_width * 0.4)
-        bar_height = int(screen_height * 0.05)
+        bar_width = int(WINDOW_WIDTH * 0.4)
+        bar_height = int(WINDOW_HEIGHT * 0.05)
 
         # Calculate current health percentage
         ratio = self.__character.get_hp() / self.__character.get_max_hp()
@@ -26,11 +25,11 @@ class HealthBar:
             y = 10
             fill_x = x
         elif self.__pos == 'topcenter':
-            x = (screen_width - bar_width) // 2
+            x = (WINDOW_WIDTH - bar_width) // 2
             y = 10
             fill_x = x
         elif self.__pos == 'topright':
-            x = screen_width - bar_width - 10
+            x = WINDOW_WIDTH - bar_width - 10
             y = 10
             fill_x = x + (bar_width - current_width)
         else:

@@ -14,24 +14,24 @@ from sprites.characters.samurai.samurai_animation import SamuraiAnimation
 from sprites.backgrounds.street.street_animation import StreetAnimation
 
 from sprites.health_bar import HealthBar
-from core.const import WINDOW_WIDTH
+from core.const import CHARACTER_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH
 import pygame
 
 class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = TokyoAnimation()
-        self.__fighter = YamabushiTengu(
+        self.__fighter = Samurai(
             x=100, 
             y=200,
-            animation=YamabushiTenguAnimation(),
+            animation=SamuraiAnimation(),
         )
         self.__health_bar_tl = HealthBar(
             pos='topleft',
             character=self.__fighter
         )
         self.__opponent = Samurai(
-            x=500, 
+            x=WINDOW_WIDTH - 100 - CHARACTER_WIDTH, 
             y=200,
             animation=SamuraiAnimation(),
         )
@@ -42,7 +42,7 @@ class BattleScene(Scene):
 
     @override
     def draw(self, screen: pygame.Surface) -> None:
-        scaled_bg_image = pygame.transform.scale(self.__bg_animation.get_current_frame(), (screen.get_width(), screen.get_height()))
+        scaled_bg_image = pygame.transform.scale(self.__bg_animation.get_current_frame(), (WINDOW_WIDTH, WINDOW_HEIGHT))
         screen.blit(scaled_bg_image, (0, 0))
         self.__fighter.draw(screen)
         self.__health_bar_tl.draw(screen)
@@ -61,21 +61,11 @@ class BattleScene(Scene):
             if event.key == pygame.K_LSHIFT:
                 self.__fighter.set_defense(False)
 
-        if event.type == pygame.VIDEORESIZE:
-            width, height = event.w, event.h
-            ratio = (width / WINDOW_WIDTH)
-            self.__fighter.set_speed(self.__fighter.get_speed() * ratio)
-            self.__opponent.set_speed(self.__opponent.get_speed() * ratio)
-            self.__fighter.set_weight(self.__fighter.get_weight() * ratio)
-            self.__opponent.set_weight(self.__opponent.get_weight() * ratio)
-            self.__fighter.set_jump_velocity(self.__fighter.get_jump_velocity() * ratio)
-            self.__opponent.set_jump_velocity(self.__opponent.get_jump_velocity() * ratio)
-
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
         self.__bg_animation.update(delta_time)
 
-        ground_y = screen.get_height() * self.__bg_animation.get_ground_y_ratio()
+        ground_y = WINDOW_HEIGHT * self.__bg_animation.get_ground_y_ratio()
         self.__fighter.apply_gravity(ground_y, delta_time)
         self.__opponent.apply_gravity(ground_y, delta_time)
 
@@ -90,12 +80,12 @@ class BattleScene(Scene):
 
         if keys[pygame.K_LEFT]:
             dx = self.__fighter.get_speed() * delta_time
-            self.__fighter.move(screen, -dx)
+            self.__fighter.move(-dx)
         if keys[pygame.K_RIGHT]:
             dx = self.__fighter.get_speed() * delta_time
-            self.__fighter.move(screen, dx)
+            self.__fighter.move(dx)
         if keys[pygame.K_z]:
-            self.__fighter.attack(screen, self.__opponent)
+            self.__fighter.attack(self.__opponent)
         if keys[pygame.K_SPACE]:
             self.__fighter.jump()
         if not any(keys):

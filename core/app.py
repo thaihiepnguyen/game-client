@@ -8,7 +8,7 @@ from core.scene.scene_manager import SceneManager
 class Application:
     def __init__(self):
         pygame.init()
-        self.__screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+        self.__screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption(WINDOW_TITLE)
 
         self.__clock = pygame.time.Clock()
@@ -29,8 +29,6 @@ class Application:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.VIDEORESIZE:
-                    self.__screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
             # Draw backgrounds
             scene.draw(self.__screen)
