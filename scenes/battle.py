@@ -21,10 +21,10 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = TokyoAnimation()
-        self.__fighter = Samurai(
+        self.__fighter = YamabushiTengu(
             x=100, 
             y=200,
-            animation=SamuraiAnimation(),
+            animation=YamabushiTenguAnimation(),
         )
         self.__health_bar_tl = HealthBar(
             pos='topleft',
@@ -76,17 +76,15 @@ class BattleScene(Scene):
         self.__fighter.update(screen, delta_time)
         self.__opponent.update(screen, delta_time)
 
-        keys = pygame.key.get_pressed()
+        fighter_atk_hitbox = self.__fighter.get_attack_hitbox()
+        opponent_hurt_box = self.__opponent.get_rect()
 
-        if keys[pygame.K_LEFT]:
-            dx = self.__fighter.get_speed() * delta_time
-            self.__fighter.move(-dx)
-        if keys[pygame.K_RIGHT]:
-            dx = self.__fighter.get_speed() * delta_time
-            self.__fighter.move(dx)
-        if keys[pygame.K_z]:
-            self.__fighter.attack(self.__opponent)
-        if keys[pygame.K_SPACE]:
-            self.__fighter.jump()
-        if not any(keys):
-            self.__fighter.idle()
+        if fighter_atk_hitbox is not None:
+            if fighter_atk_hitbox.colliderect(opponent_hurt_box) and not self.__opponent.is_on_defense():
+                intersection = fighter_atk_hitbox.clip(opponent_hurt_box)
+                damage_ratio = intersection.width / self.__opponent.get_rect().width
+                damage = self.__fighter.get_atk() * damage_ratio - self.__opponent.get_armor()
+                self.__opponent.take_damage(damage)
+
+        keys = pygame.key.get_pressed()
+        self.__fighter.handle_input(keys, delta_time)
