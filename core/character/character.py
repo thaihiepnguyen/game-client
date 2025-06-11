@@ -22,7 +22,8 @@ class Character(ABC):
 
         # --- State Flags ---
         self._moving = False
-        self._attacking = False
+        self._attacking_z = False
+        self._attacking_x = False
         self._taking_damage = False
         self._is_on_defense = False
         self._flipped = False
@@ -72,15 +73,22 @@ class Character(ABC):
     def is_dead(self) -> bool: return self._current_hp <= 0
 
     # --- Core Actions ---
-    def attack(self) -> None:
+    def attack_z(self) -> None:
         if not self._can_attack():
             return
 
-        self._attacking = True
+        self._attacking_z = True
+        self._last_attack_time = pygame.time.get_ticks()
+
+    def attack_x(self) -> None:
+        if not self._can_attack():
+            return
+
+        self._attacking_x = True
         self._last_attack_time = pygame.time.get_ticks()
 
     def move(self, dx: float) -> None:
-        if self._attacking or self._is_on_defense:
+        if self._attacking_z or self._attacking_x or self._is_on_defense:
             return
 
         self._moving = dx != 0
@@ -119,7 +127,7 @@ class Character(ABC):
             self._velocity_y = 0.0
 
     def get_attack_hitbox(self) -> pygame.rect.Rect | None:
-        if self._attacking:
+        if self._attacking_z or self._attacking_x or self._is_on_defense:
             if self._atk_rect is None:
                 attack_w = 1.8 * self._rect.width
                 attack_h = 0.3 * self._rect.height
@@ -135,7 +143,8 @@ class Character(ABC):
     def _determine_action(self) -> str:
         if self._current_hp == 0: return 'death'
         if self._taking_damage: return 'hit'
-        if self._attacking: return 'atk'
+        if self._attacking_z: return 'atk_z'
+        if self._attacking_x: return 'atk_x'
         if self._velocity_y != 0.0: return 'jump'
         if self._is_on_defense: return 'def'
         if self._moving: return 'walk'
@@ -143,6 +152,10 @@ class Character(ABC):
 
     def _can_attack(self) -> bool:
         return (pygame.time.get_ticks() - self._last_attack_time) >= ATTACK_COOLDOWN
+
+    @abstractmethod
+    def handle_event(self, event: pygame.event.Event):
+        pass
 
     def handle_input(self, keys: ScancodeWrapper, delta_time: float) -> None:
         if keys[pygame.K_LEFT]:
@@ -152,7 +165,9 @@ class Character(ABC):
             dx = self.get_speed() * delta_time
             self.move(dx)
         if keys[pygame.K_z]:
-            self.attack()
+            self.attack_z()
+        if keys[pygame.K_x]:
+            self.attack_x()
         if keys[pygame.K_SPACE]:
             self.jump()
         if not any(keys):
@@ -165,7 +180,8 @@ class Character(ABC):
         self._character_animation.update(action, delta_time)
 
         if self._character_animation.get_current_animation().is_complete():
-            if action == 'atk': self._attacking = False
+            if action == 'atk_z': self._attacking_z = False
+            if action == 'atk_x': self._attacking_x = False
             if action == 'hit': self._taking_damage = False
             if action == 'death': self._character_animation.stop_update()
 

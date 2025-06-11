@@ -65,7 +65,8 @@ class CharacterAnimation(ABC):
             "walk": self._load_walk_animation(),
             "jump": self._load_jump_animation(),
             "idle": self._load_idle_animation(),
-            "atk": self._load_attack_animation(),
+            "atk_z": self._load_attack_z_animation(),
+            "atk_x": self._load_attack_x_animation(),
             "hit": self._load_hit_animation(),
             "death": self._load_death_animation(),
             "def": self._load_def_animation(),
@@ -96,7 +97,15 @@ class CharacterAnimation(ABC):
         pass
 
     @abstractmethod
-    def _load_attack_animation(self) -> Animation:
+    def _load_attack_z_animation(self) -> Animation:
+        """
+        Load the attack animation frames.
+        :return: An Animation object for the attack action.
+        """
+        pass
+
+    @abstractmethod
+    def _load_attack_x_animation(self) -> Animation:
         """
         Load the attack animation frames.
         :return: An Animation object for the attack action.

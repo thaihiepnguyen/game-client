@@ -36,12 +36,22 @@ class YamabushiTenguAnimation(CharacterAnimation):
         return Animation(sprite=sprite, frame_duration=0.1)
 
     @override
-    def _load_attack_animation(self) -> Animation:
+    def _load_attack_z_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Attack_2.png",
             w=128,
             h=128,
             count=6,
+        )
+        return Animation(sprite=sprite, frame_duration=0.05)
+
+    @override
+    def _load_attack_x_animation(self) -> Animation:
+        sprite = Sprite(
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Attack_3.png",
+            w=128,
+            h=128,
+            count=4,
         )
         return Animation(sprite=sprite, frame_duration=0.05)
 
@@ -67,4 +77,10 @@ class YamabushiTenguAnimation(CharacterAnimation):
 
     @override
     def _load_def_animation(self) -> Animation | None:
-        return None
+        sprite = Sprite(
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Protect.png",
+            w=128,
+            h=128,
+            count=3,
+        )
+        return Animation(sprite=sprite, frame_duration=0.1)

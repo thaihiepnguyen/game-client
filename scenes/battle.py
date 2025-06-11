@@ -21,10 +21,10 @@ class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
         self.__bg_animation = TokyoAnimation()
-        self.__fighter = YamabushiTengu(
+        self.__fighter = Archer(
             x=100, 
             y=200,
-            animation=YamabushiTenguAnimation(),
+            animation=ArcherAnimation(),
         )
         self.__health_bar_tl = HealthBar(
             pos='topleft',
@@ -53,13 +53,7 @@ class BattleScene(Scene):
 
     @override
     def handle_event(self, event: pygame.event.Event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LSHIFT:
-                self.__fighter.set_defense(True)
-
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LSHIFT:
-                self.__fighter.set_defense(False)
+        self.__fighter.handle_event(event)
 
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
@@ -84,7 +78,7 @@ class BattleScene(Scene):
                 intersection = fighter_atk_hitbox.clip(opponent_hurt_box)
                 damage_ratio = intersection.width / self.__opponent.get_rect().width
                 damage = self.__fighter.get_atk() * damage_ratio - self.__opponent.get_armor()
-                self.__opponent.take_damage(damage)
+                self.__opponent.take_damage(max(0, int(damage)))
 
         keys = pygame.key.get_pressed()
         self.__fighter.handle_input(keys, delta_time)
