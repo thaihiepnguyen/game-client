@@ -2,7 +2,29 @@ from core.character.character_animation import CharacterAnimation
 from typing import override
 from core.animation.animation import Animation
 from core.animation.sprite import Sprite
+from typing import Dict
+
+
 class ArcherAnimation(CharacterAnimation):
+    @override
+    def _set_scale(self) -> float:
+        return 2
+
+    @override
+    def _load_animations(self) -> Dict[str, Animation]:
+        animations = super()._load_animations()
+        animations['atk_c'] = self._load_attack_c_animation()
+        return animations
+
+    def _load_attack_c_animation(self) -> Animation:
+        sprite = Sprite(
+            dir="assets/images/characters/archer/Sprites/Shot.png",
+            w=128,
+            h=128,
+            count=14,
+        )
+        return Animation(sprite=sprite, frame_duration=0.07)
+
     @override
     def _load_walk_animation(self) -> Animation:
         sprite = Sprite(
@@ -61,7 +83,7 @@ class ArcherAnimation(CharacterAnimation):
             h=128,
             count=3,
         )
-        return Animation(sprite=sprite, frame_duration=0.5)
+        return Animation(sprite=sprite, frame_duration=0.1)
 
     @override
     def _load_death_animation(self) -> Animation:

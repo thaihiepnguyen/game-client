@@ -7,7 +7,11 @@ class CharacterAnimation(ABC):
     def __init__(self):
         self.__animations: Dict[str, Animation | None] = self._load_animations()
         self.__current_action: str = 'idle'
-        self.__stop_update: bool = False
+        self.__scale: float = self._set_scale()
+
+        for animation in self.__animations.values():
+            if animation is not None:
+                animation.set_scale(self.__scale)
 
     def update(self, action_type: str, delta_time: float) -> None:
         """
@@ -15,25 +19,13 @@ class CharacterAnimation(ABC):
         :param action_type: The type of action (e.g., 'run', 'jump').
         :param delta_time: The time elapsed since the last update.
         """
-        if self.__stop_update:
-            return
-        if action_type in self.__animations:
-            if self.__animations[action_type] is None:
-                self.__animations[self.__current_action].reset()
-                self.__current_action = 'idle'
-            elif self.__current_action != action_type:
+        if action_type in self.__animations and self.__animations[action_type] is not None:
+            if self.__current_action != action_type:
                 self.__animations[self.__current_action].reset()
                 self.__current_action = action_type
             self.__animations[self.__current_action].update(delta_time)
         else:
             raise ValueError(f"Action type '{action_type}' not found in animations.")
-
-    def stop_update(self):
-        """
-        Stop the update of the current animation.
-        :return:
-        """
-        self.__stop_update = True
 
     def get_current_frame(self, flip: bool = False) -> pygame.Surface:
         """
@@ -55,6 +47,18 @@ class CharacterAnimation(ABC):
             return self.__animations[self.__current_action]
         else:
             raise ValueError(f"Current action '{self.__current_action}' not found in animations.")
+        
+    def get_animation_by_action(self, action: str):
+        if action not in self.__animations:
+            raise ValueError(f"Action '{action}' not found in animations.")
+        return self.__animations[action]
+
+    def _set_scale(self) -> float:
+        """
+        Set the scale for the current animation.
+        This method should be implemented by subclasses to set the scale of the animation frames.
+        """
+        return 1.0
 
     def _load_animations(self) -> Dict[str, Animation]:
         """
@@ -81,7 +85,7 @@ class CharacterAnimation(ABC):
         pass
 
     @abstractmethod
-    def _load_jump_animation(self) -> Animation:
+    def _load_jump_animation(self) -> Animation | None:
         """
         Load the jump animation frames.
         :return: An Animation object for the jump action.

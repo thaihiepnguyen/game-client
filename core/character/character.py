@@ -5,42 +5,40 @@ from pygame.key import ScancodeWrapper
 
 from core.const import ATTACK_COOLDOWN, CHARACTER_HEIGHT, CHARACTER_WIDTH, Colors, GRAVITY, LOCK_FPS, SHADOW_HEIGHT, SHADOW_WIDTH, WINDOW_WIDTH
 from core.character.character_animation import CharacterAnimation
+from typing import List
 
 class Character(ABC):
     def __init__(self, x: float, y: float, character_animation: CharacterAnimation):
         # --- Stats ---
-        self._max_hp = 100
-        self._current_hp = self._max_hp
-        self._atk = self._set_atk()
-        self._armor = self._set_armor()
+        self.__max_hp = 100
+        self.__current_hp = self.__max_hp
+        self.__atk = self._set_atk()
+        self.__armor = self._set_armor()
 
         # --- Movement / Physics ---
         self._velocity_y = 0.0
-        self._speed = self._set_speed()
-        self._weight = self._set_weight()
-        self._jump_velocity = self._set_jump_velocity()
+        self.__speed = self._set_speed()
+        self.__weight = self._set_weight()
+        self.__jump_velocity = self._set_jump_velocity()
 
         # --- State Flags ---
-        self._moving = False
-        self._attacking_z = False
-        self._attacking_x = False
-        self._taking_damage = False
-        self._is_on_defense = False
+        self._state = 'idle'
+        self.__stop_update = False
         self._flipped = False
-        self._is_invincible = False
+        self.__is_invincible = False
 
         # --- Timers ---
         self._last_attack_time = 0
-        self._invincibility_time = 0
+        self.__invincibility_time = 0
 
         # --- Graphics & Hitboxes ---
         self._rect = pygame.Rect(x, y, CHARACTER_WIDTH, CHARACTER_HEIGHT)
         self._shadow_rect = pygame.Rect(x, y, SHADOW_WIDTH, SHADOW_HEIGHT)
         self._character_animation = character_animation
-        self._atk_rect = None
+        self.__atk_rect = None
 
         # --- Sanity Check ---
-        if self._speed < 0 or self._weight <= 0 or self._jump_velocity < 0 or self._atk < 0 or self._armor < 0:
+        if self.__speed < 0 or self.__weight <= 0 or self.__jump_velocity < 0 or self.__atk < 0 or self.__armor < 0:
             raise ValueError("Speed, weight, jump_velocity, and atk must be non-negative.")
 
     # --- Abstract Setters for Subclasses ---
@@ -59,135 +57,148 @@ class Character(ABC):
     @abstractmethod
     def _set_armor(self) -> float: pass
 
-    # --- Public Setters ---
-    def set_defense(self, is_on_defense: bool): self._is_on_defense = is_on_defense
-
     # --- Public Getters ---
     def get_rect(self) -> pygame.rect.Rect: return self._rect
-    def get_hp(self) -> float: return self._current_hp
-    def get_max_hp(self) -> float: return self._max_hp
-    def get_atk(self) -> float: return self._atk
-    def get_speed(self) -> float: return self._speed
-    def get_armor(self) -> float: return self._armor
-    def is_on_defense(self) -> bool: return self._is_on_defense
-    def is_dead(self) -> bool: return self._current_hp <= 0
+    def get_hp(self) -> float: return self.__current_hp
+    def get_max_hp(self) -> float: return self.__max_hp
+    def get_atk(self) -> float: return self.__atk
+    def get_speed(self) -> float: return self.__speed
+    def get_armor(self) -> float: return self.__armor
+    def is_dead(self) -> bool: return self.__current_hp <= 0
 
     # --- Core Actions ---
-    def attack_z(self) -> None:
+    def _attack_z(self) -> None:
         if not self._can_attack():
             return
 
-        self._attacking_z = True
+        self._state = 'atk_z'
         self._last_attack_time = pygame.time.get_ticks()
 
-    def attack_x(self) -> None:
+    def _attack_x(self) -> None:
         if not self._can_attack():
             return
 
-        self._attacking_x = True
+        self._state = 'atk_x'
         self._last_attack_time = pygame.time.get_ticks()
 
-    def move(self, dx: float) -> None:
-        if self._attacking_z or self._attacking_x or self._is_on_defense:
+    def _prevent_move_actions(self):
+        return ['atk_z', 'atk_x', 'atk_c', 'def', 'hit']
+
+    def walk(self, dx: float) -> None:
+        if self._state in self._prevent_move_actions():
             return
 
-        self._moving = dx != 0
-        self._rect.x = max(0, min(self._rect.x + dx, WINDOW_WIDTH - self._rect.width))
-
-    def jump(self) -> None:
-        if self._velocity_y == 0.0 and not self._is_on_defense:
-            self._velocity_y = -self._jump_velocity * LOCK_FPS
-
-    def take_damage(self, damage: float, knock_back: int = 5) -> None:
-        if self._is_invincible:
+        x = max(0, min(int(self._rect.x + dx), WINDOW_WIDTH - self._rect.width))
+        if self._state == 'jump':
+            self._rect.x = x
             return
-        self._taking_damage = True
-        self._current_hp = max(0.0, self._current_hp - damage)
 
-        self._is_invincible = True
-        self._invincibility_time = pygame.time.get_ticks()
+        self._state = 'walk'
+        self._rect.x = x
 
-        if self._flipped:
-            self._rect.x += knock_back
-        else:
-            self._rect.x -= knock_back
+    def _jump(self) -> None:
+        if self._state in self._prevent_move_actions():
+            return
 
-    def idle(self): self._moving = False
+        self._state = 'jump'
+        if self._velocity_y == 0.0:
+            self._velocity_y = -self.__jump_velocity * LOCK_FPS
+
+    def _defend(self) -> None:
+        self._state = 'def'
+
+    def is_defend(self) -> bool:
+        return self._state == 'def'
+
+    def take_damage(self, damage: float, knock_back: int = 15) -> None:
+        if self.__is_invincible:
+            return
+
+        self._state = 'hit'
+        self.__current_hp = max(0.0, self.__current_hp - damage)
+
+        self.__is_invincible = True
+        self.__invincibility_time = pygame.time.get_ticks()
+
+        x = max(0, min(int(self._rect.x + knock_back * int(self._flipped)), WINDOW_WIDTH - self._rect.width))
+        self._rect.x = x
 
     def look_at(self, opponent: "Character") -> None:
         if not self.is_dead():
             self._flipped = self._rect.centerx > opponent._rect.centerx
 
     def apply_gravity(self, ground_y: float, delta_time: float) -> None:
-        self._velocity_y += GRAVITY * self._weight * delta_time
+        self._velocity_y += GRAVITY * self.__weight * delta_time
         self._rect.y += self._velocity_y * delta_time
 
         if self._rect.bottom >= ground_y:
-            self._rect.bottom = ground_y
+            self._rect.bottom = int(ground_y)
             self._velocity_y = 0.0
 
     def get_attack_hitbox(self) -> pygame.rect.Rect | None:
-        if self._attacking_z or self._attacking_x or self._is_on_defense:
-            if self._atk_rect is None:
+        if self._state == 'atk_z' or self._state == 'atk_x':
+            if self.__atk_rect is None:
                 attack_w = 1.8 * self._rect.width
                 attack_h = 0.3 * self._rect.height
                 attack_x = self._rect.centerx - attack_w if self._flipped else self._rect.centerx
                 attack_y = self._rect.y + 20
 
-                self._atk_rect = pygame.Rect(attack_x, attack_y, attack_w, attack_h)
+                self.__atk_rect = pygame.Rect(attack_x, attack_y, attack_w, attack_h)
         else:
-            self._atk_rect = None
+            self.__atk_rect = None
 
-        return self._atk_rect
-
-    def _determine_action(self) -> str:
-        if self._current_hp == 0: return 'death'
-        if self._taking_damage: return 'hit'
-        if self._attacking_z: return 'atk_z'
-        if self._attacking_x: return 'atk_x'
-        if self._velocity_y != 0.0: return 'jump'
-        if self._is_on_defense: return 'def'
-        if self._moving: return 'walk'
-        return 'idle'
+        return self.__atk_rect
 
     def _can_attack(self) -> bool:
         return (pygame.time.get_ticks() - self._last_attack_time) >= ATTACK_COOLDOWN
 
-    @abstractmethod
     def handle_event(self, event: pygame.event.Event):
-        pass
+        """Handle input events for the character."""
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_z:
+                self._attack_z()
+
+            if event.key == pygame.K_x:
+                self._attack_x()
+
+            if event.key == pygame.K_SPACE:
+                self._jump()
+
+        if event.type == pygame.KEYUP:
+            if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_LSHIFT]:
+                if self._state == 'walk' or self._state == 'def':
+                    self._state = 'idle'
 
     def handle_input(self, keys: ScancodeWrapper, delta_time: float) -> None:
         if keys[pygame.K_LEFT]:
             dx = self.get_speed() * delta_time
-            self.move(-dx)
+            self.walk(-dx)
         if keys[pygame.K_RIGHT]:
             dx = self.get_speed() * delta_time
-            self.move(dx)
-        if keys[pygame.K_z]:
-            self.attack_z()
-        if keys[pygame.K_x]:
-            self.attack_x()
-        if keys[pygame.K_SPACE]:
-            self.jump()
-        if not any(keys):
-            self.idle()
+            self.walk(dx)
+
+    def _one_loop_actions(self) -> List[str]:
+        return ['atk_z', 'atk_x', 'atk_c', 'hit', 'jump']
 
     # --- Update & Animation ---
-    @abstractmethod
     def update(self, screen: pygame.Surface, delta_time: float) -> None:
-        action = self._determine_action()
-        self._character_animation.update(action, delta_time)
+        if self.__stop_update:
+            return
+
+        if self.is_dead():
+            self._state = 'death'
+
+        self._character_animation.update(self._state, delta_time)
 
         if self._character_animation.get_current_animation().is_complete():
-            if action == 'atk_z': self._attacking_z = False
-            if action == 'atk_x': self._attacking_x = False
-            if action == 'hit': self._taking_damage = False
-            if action == 'death': self._character_animation.stop_update()
+            if self._state == 'death':
+                self.__stop_update = True
+            if self._state in self._one_loop_actions():
+                self._state = 'idle'
 
-        if self._is_invincible:
-            if pygame.time.get_ticks() - self._invincibility_time > 500:
-                self._is_invincible = False
+        if self.__is_invincible:
+            if pygame.time.get_ticks() - self.__invincibility_time > 500:
+                self.__is_invincible = False
 
     # --- Drawing ---
     def draw(self, screen: pygame.Surface, debug: bool = False) -> None:

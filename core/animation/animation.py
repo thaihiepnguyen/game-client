@@ -14,6 +14,14 @@ class Animation:
         self.__current_frame_index = 0
         self.__time_since_last_frame = 0.0
         self.__scale = 1
+        self.__on_complete_subscribers = []
+
+    def subscribe_on_complete(self, callback):
+        """
+        Subscribe a callback to be called when the animation completes.
+        :param callback: Function to call when the animation completes.
+        """
+        self.__on_complete_subscribers.append(callback)
 
     def update(self, delta_time: float):
         """Update the animation based on the elapsed time."""
@@ -21,6 +29,11 @@ class Animation:
 
         if self.__time_since_last_frame >= self.__frame_duration:
             self.__current_frame_index = (self.__current_frame_index + 1) % len(self.__frames)
+            if self.is_complete():
+                for callback in self.__on_complete_subscribers:
+                    callback(self)
+
+                self.__on_complete_subscribers = []
             self.__time_since_last_frame = 0.0
 
     def get_current_frame(self, flip: bool = False, darken: int = 0) -> pygame.Surface:

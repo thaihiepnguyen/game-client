@@ -6,6 +6,10 @@ from core.animation.sprite import Sprite
 
 class YamabushiTenguAnimation(CharacterAnimation):
     @override
+    def _set_scale(self) -> float:
+        return 1.6
+
+    @override
     def _load_walk_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Walk.png",

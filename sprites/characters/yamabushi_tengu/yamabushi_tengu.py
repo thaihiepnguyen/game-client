@@ -1,5 +1,7 @@
 from typing import override
 
+from pygame.key import ScancodeWrapper
+
 from core.character.character import Character
 from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
 
@@ -8,22 +10,16 @@ import pygame
 class YamabushiTengu(Character):
     def __init__(self, x: float, y: float, animation: YamabushiTenguAnimation):
         super().__init__(x, y, animation)
-        self._scale = 2
 
     @override
-    def handle_event(self, event: pygame.event.Event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LSHIFT:
-                self.set_defense(True)
-
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LSHIFT:
-                self.set_defense(False)
+    def handle_input(self, keys: ScancodeWrapper, delta_time: float) -> None:
+        super().handle_input(keys, delta_time)
+        if keys[pygame.K_LSHIFT]:
+            self._defend()
 
     @override
     def update(self, screen: pygame.Surface, delta_time: float):
         super().update(screen, delta_time)
-        self._character_animation.get_current_animation().set_scale(self._scale)
 
     @override
     def _set_speed(self) -> float:
@@ -39,7 +35,7 @@ class YamabushiTengu(Character):
 
     @override
     def _set_atk(self) -> float:
-        return 10
+        return 40
 
     @override
     def _set_armor(self) -> float:
