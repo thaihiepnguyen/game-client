@@ -18,6 +18,6 @@ pip3 -r install -r requirements.txt
 python3 main.py
 ```
 
-### 3. Preview
+### 4. Preview
 
 ![image](./preview/battle.png)
