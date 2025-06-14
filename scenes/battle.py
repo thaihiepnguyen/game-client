@@ -22,7 +22,7 @@ import pygame
 class BattleScene(Scene):
     def __init__(self, scene_manager):
         super().__init__(scene_manager)
-        self.__bg_animation = TempleAnimation()
+        self.__bg_animation = CountrysideAnimation()
         self.__fighter = Archer(
             x=100, 
             y=200,

@@ -42,5 +42,4 @@ class HealthBar:
         # Draw health fill
         pygame.draw.rect(screen, (0, 255, 0), (fill_x, y, current_width, bar_height),0, self.__radius if ratio == 1 else 0)
 
-        # Optionally, draw border
         pygame.draw.rect(screen, (255, 255, 255), (x, y, bar_width, bar_height), 2, self.__radius)
