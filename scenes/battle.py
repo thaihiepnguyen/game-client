@@ -7,6 +7,8 @@ from sprites.backgrounds.temple.temple_animation import TempleAnimation
 from sprites.backgrounds.tokyo.tokyo_animation import TokyoAnimation
 from sprites.characters.archer.archer import Archer
 from sprites.characters.archer.archer_animation import ArcherAnimation
+from sprites.characters.fighter.fighter import Fighter
+from sprites.characters.fighter.fighter_animation import FighterAnimation
 from sprites.characters.gorgon.gorgon import Gorgon
 from sprites.characters.gorgon.gorgon_animation import GorgonAnimation
 from sprites.characters.yamabushi_tengu.yamabushi_tengu import YamabushiTengu
@@ -31,7 +33,7 @@ class BattleScene(Scene):
             character=self.__fighter
         )
         self.__opponent = Gorgon(
-            x=WINDOW_WIDTH - 100 - CHARACTER_WIDTH, 
+            x=WINDOW_WIDTH - 100 - CHARACTER_WIDTH,
             y=200,
             animation=GorgonAnimation(),
         )
@@ -70,21 +72,27 @@ class BattleScene(Scene):
         self.__fighter.update(screen, delta_time)
         self.__opponent.update(screen, delta_time)
 
-        fighter_atk_hitbox = self.__fighter.get_attack_hitbox()
-        arrows = self.__fighter.get_arrows() if hasattr(self.__fighter, 'get_arrows') else []
+        fighter_atk_hitbox = self.__fighter.get_attack_hitbox(screen)
         opponent_hurt_box = self.__opponent.get_rect()
+        get_kick_away_box = self.__fighter.get_kick_away_box() if hasattr(self.__fighter, 'get_kick_away_box') else None
+        arrows = self.__fighter.get_arrows() if hasattr(self.__fighter, 'get_arrows') else []
+
+        if get_kick_away_box is not None:
+            if get_kick_away_box.colliderect(opponent_hurt_box) and not self.__opponent.is_defend():
+                self.__opponent.take_damage(max(0.0, self.__fighter.get_atk() - self.__opponent.get_armor()), 200)
 
         if fighter_atk_hitbox is not None:
             if fighter_atk_hitbox.colliderect(opponent_hurt_box) and not self.__opponent.is_defend():
                 intersection = fighter_atk_hitbox.clip(opponent_hurt_box)
                 damage_ratio = intersection.width / self.__opponent.get_rect().width
                 damage = self.__fighter.get_atk() * damage_ratio - self.__opponent.get_armor()
-                self.__opponent.take_damage(max(0, int(damage)))
+                self.__opponent.take_damage(max(0.0, damage))
 
         if len(arrows) != 0:
             for arrow in arrows:
                 if arrow.get_rect().colliderect(opponent_hurt_box) and not self.__opponent.is_defend():
-                    self.__opponent.take_damage(max(0, int(20)))
+                    damage = arrow.get_damage() - self.__opponent.get_armor()
+                    self.__opponent.take_damage(max(0.0, damage))
 
         keys = pygame.key.get_pressed()
         self.__fighter.handle_input(keys, delta_time)

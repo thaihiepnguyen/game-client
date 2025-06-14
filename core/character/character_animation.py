@@ -71,6 +71,7 @@ class CharacterAnimation(ABC):
             "idle": self._load_idle_animation(),
             "atk_z": self._load_attack_z_animation(),
             "atk_x": self._load_attack_x_animation(),
+            "atk_c": self._load_attack_c_animation(),
             "hit": self._load_hit_animation(),
             "death": self._load_death_animation(),
             "def": self._load_def_animation(),
@@ -110,6 +111,14 @@ class CharacterAnimation(ABC):
 
     @abstractmethod
     def _load_attack_x_animation(self) -> Animation:
+        """
+        Load the attack animation frames.
+        :return: An Animation object for the attack action.
+        """
+        pass
+
+    @abstractmethod
+    def _load_attack_c_animation(self) -> Animation:
         """
         Load the attack animation frames.
         :return: An Animation object for the attack action.

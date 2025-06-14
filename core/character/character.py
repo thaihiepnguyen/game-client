@@ -1,6 +1,7 @@
 import pygame
 from abc import ABC, abstractmethod
 
+from pygame import Rect
 from pygame.key import ScancodeWrapper
 
 from core.const import ATTACK_COOLDOWN, CHARACTER_HEIGHT, CHARACTER_WIDTH, Colors, GRAVITY, LOCK_FPS, SHADOW_HEIGHT, SHADOW_WIDTH, WINDOW_WIDTH
@@ -12,8 +13,9 @@ class Character(ABC):
         # --- Stats ---
         self.__max_hp = 100
         self.__current_hp = self.__max_hp
-        self.__atk = self._set_atk()
+        self.__atk_z, self.__atk_x, self.__atk_c = self._set_atk()
         self.__armor = self._set_armor()
+        self.__attack_count_down = self._set_attack_count_down()
 
         # --- Movement / Physics ---
         self._velocity_y = 0.0
@@ -38,48 +40,63 @@ class Character(ABC):
         self.__atk_rect = None
 
         # --- Sanity Check ---
-        if self.__speed < 0 or self.__weight <= 0 or self.__jump_velocity < 0 or self.__atk < 0 or self.__armor < 0:
-            raise ValueError("Speed, weight, jump_velocity, and atk must be non-negative.")
+        if self.__speed < 0 or self.__weight <= 0 or self.__jump_velocity < 0 or self.__atk_z < 0 or self.__atk_x < 0 or self.__atk_c < 0 or self.__armor < 0:
+            raise ValueError('Speed, weight, jump_velocity, atk and armor must be non-negative.')
 
     # --- Abstract Setters for Subclasses ---
     @abstractmethod
-    def _set_speed(self) -> float: pass
+    def _set_speed(self) -> float:
+        """Set the speed of the character, affecting movement speed."""
+        pass
 
     @abstractmethod
-    def _set_weight(self) -> float: pass
+    def _set_weight(self) -> float:
+        """Set the weight of the character, affecting gravity and jump physics."""
+        pass
 
     @abstractmethod
-    def _set_jump_velocity(self) -> float: pass
+    def _set_jump_velocity(self) -> float:
+        """Set the jump velocity for the character."""
+        pass
 
     @abstractmethod
-    def _set_atk(self) -> float: pass
+    def _set_atk(self) -> tuple[float, float, float]:
+        """Set the attack values for different attack types (z, x, c)."""
+        pass
 
     @abstractmethod
-    def _set_armor(self) -> float: pass
+    def _set_armor(self) -> float:
+        """Set the armor value for the character, affecting damage taken."""
+        pass
+
+    def _set_attack_count_down(self) -> int:
+        """Set the cooldown time for attacks in milliseconds."""
+        return ATTACK_COOLDOWN
 
     # --- Public Getters ---
-    def get_rect(self) -> pygame.rect.Rect: return self._rect
+    def get_rect(self) -> Rect: return self._rect
     def get_hp(self) -> float: return self.__current_hp
     def get_max_hp(self) -> float: return self.__max_hp
-    def get_atk(self) -> float: return self.__atk
+    def get_atk(self) -> float:
+        if self._state == 'atk_z':
+            return self.__atk_z
+        elif self._state == 'atk_x':
+            return self.__atk_x
+        return self.__atk_c
     def get_speed(self) -> float: return self.__speed
     def get_armor(self) -> float: return self.__armor
     def is_dead(self) -> bool: return self.__current_hp <= 0
+    def is_defend(self) -> bool: return self._state == 'def'
 
     # --- Core Actions ---
     def _attack_z(self) -> None:
-        if not self._can_attack():
-            return
-
         self._state = 'atk_z'
-        self._last_attack_time = pygame.time.get_ticks()
 
     def _attack_x(self) -> None:
-        if not self._can_attack():
-            return
-
         self._state = 'atk_x'
-        self._last_attack_time = pygame.time.get_ticks()
+
+    def _attack_c(self) -> None:
+        self._state = 'atk_c'
 
     def _prevent_move_actions(self):
         return ['atk_z', 'atk_x', 'atk_c', 'def', 'hit']
@@ -107,9 +124,6 @@ class Character(ABC):
     def _defend(self) -> None:
         self._state = 'def'
 
-    def is_defend(self) -> bool:
-        return self._state == 'def'
-
     def take_damage(self, damage: float, knock_back: int = 15) -> None:
         if self.__is_invincible:
             return
@@ -120,7 +134,7 @@ class Character(ABC):
         self.__is_invincible = True
         self.__invincibility_time = pygame.time.get_ticks()
 
-        x = max(0, min(int(self._rect.x + knock_back * int(self._flipped)), WINDOW_WIDTH - self._rect.width))
+        x = max(0, min(int(self._rect.x + knock_back * (1 if self._flipped else -1)), WINDOW_WIDTH - self._rect.width))
         self._rect.x = x
 
     def look_at(self, opponent: "Character") -> None:
@@ -135,31 +149,66 @@ class Character(ABC):
             self._rect.bottom = int(ground_y)
             self._velocity_y = 0.0
 
-    def get_attack_hitbox(self) -> pygame.rect.Rect | None:
-        if self._state == 'atk_z' or self._state == 'atk_x':
-            if self.__atk_rect is None:
-                attack_w = 1.8 * self._rect.width
-                attack_h = 0.3 * self._rect.height
-                attack_x = self._rect.centerx - attack_w if self._flipped else self._rect.centerx
-                attack_y = self._rect.y + 20
+    def get_atk_z_box(self) -> Rect:
+        w = 1.2 * self._rect.width
+        h = 0.3 * self._rect.height
+        x = (self._rect.centerx - w) if self._flipped else self._rect.centerx
+        y = self._rect.y + self._rect.height * 0.5 - h * 0.5
+        return Rect(x, y, w, h)
 
-                self.__atk_rect = pygame.Rect(attack_x, attack_y, attack_w, attack_h)
+    def get_atk_x_box(self) -> Rect:
+        w = 1.2 * self._rect.width
+        h = 0.3 * self._rect.height
+        x = (self._rect.centerx - w) if self._flipped else self._rect.centerx
+        y = self._rect.y + self._rect.height * 0.5 - h * 0.5
+        return Rect(x, y, w, h)
+
+    def get_atk_c_box(self) -> Rect | None:
+        w = 1.2 * self._rect.width
+        h = 0.3 * self._rect.height
+        x = (self._rect.centerx - w) if self._flipped else self._rect.centerx
+        y = self._rect.y + self._rect.height * 0.5 - h * 0.5
+        return Rect(x, y, w, h)
+
+    def get_attack_hitbox(self, screen: pygame.Surface, debug: bool = False) -> Rect | None:
+        if self._state == 'atk_z':
+            self.__atk_rect = self.get_atk_z_box()
+        elif self._state == 'atk_x':
+            self.__atk_rect = self.get_atk_x_box()
+        elif self._state == 'atk_c':
+            self.__atk_rect = self.get_atk_c_box()
         else:
             self.__atk_rect = None
 
+        if self.__atk_rect is not None:
+            if debug:
+                pygame.draw.rect(screen, Colors.RED.value, self.__atk_rect)
+
         return self.__atk_rect
 
-    def _can_attack(self) -> bool:
-        return (pygame.time.get_ticks() - self._last_attack_time) >= ATTACK_COOLDOWN
+    def __can_attack(self) -> bool:
+        return (pygame.time.get_ticks() - self._last_attack_time) >= self.__attack_count_down
 
     def handle_event(self, event: pygame.event.Event):
         """Handle input events for the character."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_z:
+                if not self.__can_attack():
+                    return
                 self._attack_z()
+                self._last_attack_time = pygame.time.get_ticks()
 
             if event.key == pygame.K_x:
+                if not self.__can_attack():
+                    return
                 self._attack_x()
+                self._last_attack_time = pygame.time.get_ticks()
+
+            if event.key == pygame.K_c:
+                if not self.__can_attack():
+                    return
+                self._attack_c()
+                self._last_attack_time = pygame.time.get_ticks()
 
             if event.key == pygame.K_SPACE:
                 self._jump()
@@ -178,6 +227,7 @@ class Character(ABC):
             self.walk(dx)
 
     def _one_loop_actions(self) -> List[str]:
+        """Return a list of actions that should only run once per input."""
         return ['atk_z', 'atk_x', 'atk_c', 'hit', 'jump']
 
     # --- Update & Animation ---

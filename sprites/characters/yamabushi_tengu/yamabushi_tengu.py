@@ -17,26 +17,21 @@ class YamabushiTengu(Character):
         if keys[pygame.K_LSHIFT]:
             self._defend()
 
-    @override
-    def update(self, screen: pygame.Surface, delta_time: float):
-        super().update(screen, delta_time)
-
-    @override
     def _set_speed(self) -> float:
         return 300
 
-    @override
     def _set_weight(self) -> float:
         return 1
 
-    @override
     def _set_jump_velocity(self) -> float:
         return 34
 
-    @override
-    def _set_atk(self) -> float:
-        return 40
+    def _set_atk(self) -> tuple[float, float, float]:
+        return (
+            10,  # Attack power for 'z' attack
+            15,  # Attack power for 'x' attack
+            20   # Attack power for 'c' attack
+        )
 
-    @override
     def _set_armor(self) -> float:
         return 2

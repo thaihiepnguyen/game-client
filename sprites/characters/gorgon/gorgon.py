@@ -13,22 +13,21 @@ class Gorgon(Character):
     def _jump(self) -> None:
         return
 
-    @override
     def _set_speed(self) -> float:
-        return 300
+        return 350
 
-    @override
     def _set_weight(self) -> float:
         return 1
 
-    @override
     def _set_jump_velocity(self) -> float:
-        return 36
+        return 0
 
-    @override
-    def _set_atk(self) -> float:
-        return 10
+    def _set_atk(self) -> tuple[float, float, float]:
+        return (
+            10,  # Attack power for 'z' attack
+            15,  # Attack power for 'x' attack
+            20   # Attack power for 'c' attack
+        )
 
-    @override
     def _set_armor(self) -> float:
-        return 1
+        return 3

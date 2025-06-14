@@ -9,7 +9,6 @@ class YamabushiTenguAnimation(CharacterAnimation):
     def _set_scale(self) -> float:
         return 1.6
 
-    @override
     def _load_walk_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Walk.png",
@@ -19,7 +18,6 @@ class YamabushiTenguAnimation(CharacterAnimation):
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
-    @override
     def _load_jump_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Jump.png",
@@ -29,7 +27,6 @@ class YamabushiTenguAnimation(CharacterAnimation):
         )
         return Animation(sprite=sprite, frame_duration=0.04)
 
-    @override
     def _load_idle_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Idle_2.png",
@@ -39,8 +36,17 @@ class YamabushiTenguAnimation(CharacterAnimation):
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
-    @override
     def _load_attack_z_animation(self) -> Animation:
+        sprite = Sprite(
+            dir="assets/images/characters/yamabushi_tengu/Sprites/Attack_1.png",
+            w=128,
+            h=128,
+            count=3,
+        )
+        return Animation(sprite=sprite, frame_duration=0.05)
+
+
+    def _load_attack_x_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Attack_2.png",
             w=128,
@@ -49,17 +55,15 @@ class YamabushiTenguAnimation(CharacterAnimation):
         )
         return Animation(sprite=sprite, frame_duration=0.05)
 
-    @override
-    def _load_attack_x_animation(self) -> Animation:
+    def _load_attack_c_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Attack_3.png",
             w=128,
             h=128,
             count=4,
         )
-        return Animation(sprite=sprite, frame_duration=0.05)
+        return Animation(sprite=sprite, frame_duration=0.1)
 
-    @override
     def _load_hit_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Idle.png",
@@ -69,7 +73,6 @@ class YamabushiTenguAnimation(CharacterAnimation):
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
-    @override
     def _load_death_animation(self) -> Animation:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Dead.png",
@@ -79,7 +82,6 @@ class YamabushiTenguAnimation(CharacterAnimation):
         )
         return Animation(sprite=sprite, frame_duration=0.1)
 
-    @override
     def _load_def_animation(self) -> Animation | None:
         sprite = Sprite(
             dir="assets/images/characters/yamabushi_tengu/Sprites/Protect.png",
