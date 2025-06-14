@@ -12,12 +12,12 @@ source venv/bin/active
 pip3 -r install -r requirements.txt 
 ```
 
-### 4. Run project
+### 3. Run project
 
 ```
 python3 main.py
 ```
 
-### 5. Preview
+### 3. Preview
 
 ![image](./preview/battle.png)
