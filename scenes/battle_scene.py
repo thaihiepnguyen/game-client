@@ -15,7 +15,7 @@ from sprites.characters.yamabushi_tengu.yamabushi_tengu import YamabushiTengu
 from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
 from sprites.backgrounds.street.street_animation import StreetAnimation
 
-from sprites.health_bar import HealthBar
+from sprites.health_bar.health_bar import HealthBar
 from core.const import CHARACTER_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH
 import pygame
 
@@ -42,7 +42,6 @@ class BattleScene(Scene):
             character=self.__opponent
         )
 
-    @override
     def draw(self, screen: pygame.Surface) -> None:
         scaled_bg_image = pygame.transform.scale(self.__bg_animation.get_current_frame(), (WINDOW_WIDTH, WINDOW_HEIGHT))
         screen.blit(scaled_bg_image, (0, 0))
@@ -53,11 +52,9 @@ class BattleScene(Scene):
         self.__fighter.look_at(self.__opponent)
         self.__opponent.look_at(self.__fighter)
 
-    @override
     def handle_event(self, event: pygame.event.Event):
         self.__fighter.handle_event(event)
 
-    @override
     def update(self, screen: pygame.Surface, delta_time: float):
         self.__bg_animation.update(delta_time)
 

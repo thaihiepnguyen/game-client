@@ -1,6 +1,5 @@
 
 
-
 # Constants for the game
 from enum import Enum
 
@@ -14,10 +13,21 @@ CHARACTER_WIDTH = 60
 CHARACTER_HEIGHT = 150
 SHADOW_WIDTH = 80
 SHADOW_HEIGHT = 15
+MAIN_BACKGROUND = "assets/images/main_bg.png"
+FONT= "assets/fonts/pixel.otf"
+SOUND_BACKGROUND = "assets/sounds/sound_bg.mp3"
+
+# Constants for networking
+
+HOST = "localhost"
+PORT = 8081
+
+LITTLE_BYTE_ORDER = "little"  # Byte order for network packets
+HEADER_SIZE = 8  # Size of the packet header in bytes
 
 # Constants for scene management
 MAIN_MENU_SCENE = "main_menu"
-LOGIN_SCENE = "login"
+MAIN_SCENE = "main"
 BATTLE_SCENE = "battle"
 
 # Constants for animations

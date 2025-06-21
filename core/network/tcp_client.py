@@ -1,8 +1,3 @@
-
-from core.network.move_packet import MovePacket
-from core.network.packet_header import PacketHeader
-
-
 class TCPClient:
     def __init__(self, host: str, port: int):
         self.__host = host
@@ -26,16 +21,3 @@ class TCPClient:
         if self.__socket:
             self.__socket.close()
             self.__socket = None
-        
-
-if __name__ == "__main__":
-    client = TCPClient('localhost', 8080)
-    client.connect()
-
-    header = PacketHeader(command_id=1, packet_length=8)
-    move_packet = MovePacket(header, x=100, y=200)
-
-    client.send(move_packet.to_bytes())
-    response = client.recv()
-    print(f'Received: {response}')
-    client.close()

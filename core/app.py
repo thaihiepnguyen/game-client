@@ -8,6 +8,9 @@ from core.scene.scene_manager import SceneManager
 class Application:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
+        sound1 = pygame.mixer.Sound(SOUND_BACKGROUND)
+        sound1.play(-1)
         self.__screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption(WINDOW_TITLE)
 

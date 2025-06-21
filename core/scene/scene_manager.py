@@ -1,5 +1,5 @@
-from scenes.battle import BattleScene
-from scenes.login import LoginScene
+from scenes.battle_scene import BattleScene
+from scenes.main_scene import MainScene
 from core.scene import scene
 from core.const import *
 
@@ -22,7 +22,7 @@ class SceneManager:
         This method can be extended to load resources or perform setup tasks.
         """
         scenes = {
-            LOGIN_SCENE: LoginScene,
+            MAIN_SCENE: MainScene,
             BATTLE_SCENE: BattleScene,
             # Add more scenes here as needed
         }
