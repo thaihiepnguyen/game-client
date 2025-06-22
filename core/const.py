@@ -27,6 +27,8 @@ HEADER_SIZE = 8  # Size of the packet header in bytes
 
 class CommandId(Enum):
     WAIT_FOR_MATCH = 1
+    BROADCAST = 2
+    
 
 # Constants for scene management
 MAIN_MENU_SCENE = "main_menu"
@@ -58,3 +60,28 @@ class BackgroundId(Enum):
     STREET = 3
     TEMPLE = 4
     TOKYO = 5
+
+
+CHARACTER_STATES = {
+    "idle": 0,
+    "walk": 1,
+    "jump": 2,
+    "def": 3,
+    "hit": 4,
+    "atk_z": 5,
+    "atk_x": 6,
+    "atk_c": 7,
+    "death": 8
+}
+
+CHARACTER_REVERSIBLE_STATES = {
+    0: "idle",
+    1: "walk",
+    2: "jump",
+    3: "def",
+    4: "hit",
+    5: "atk_z",
+    6: "atk_x",
+    7: "atk_c",
+    8: "death"
+}

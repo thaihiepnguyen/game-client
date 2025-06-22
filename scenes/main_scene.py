@@ -80,7 +80,6 @@ class MainScene(Scene):
                 if packet.header.command_id == CommandId.WAIT_FOR_MATCH.value:
                     self.is_waiting_for_match = False
                     self._scene_manager.set_scene(BATTLE_SCENE, {
-                        'room_id': packet.room_id,
                         'char': packet.char,
                         'oppo': packet.oppo,
                         'bg': packet.bg,

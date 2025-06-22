@@ -90,18 +90,25 @@ class Character(ABC):
 
     # --- Public Setters ---
     def set_x(self, x: int) -> None:
-        """
-        Set the x-coordinate of the character's position.
-        Ensures the character does not move out of bounds.
-        """
         self._rect.x = max(0, min(x, WINDOW_WIDTH - self._rect.width))
-
+    
     def set_y(self, y: int) -> None:
-        """
-        Set the y-coordinate of the character's position.
-        Ensures the character does not move out of bounds.
-        """
         self._rect.y = max(0, y)
+    
+    def set_hp(self, hp: float) -> None:
+        self.__current_hp = max(0.0, min(hp, self.__max_hp))
+
+    def set_flipped(self, flipped: bool) -> None:
+        """Set the flipped state of the character, affecting direction."""
+        self._flipped = flipped
+
+    def set_state(self, state: str) -> None:
+        """Set the current state of the character."""
+        valid_states = ['idle', 'walk', 'jump', 'atk_z', 'atk_x', 'atk_c', 'def', 'hit', 'death']
+        if state in valid_states:
+            self._state = state
+        else:
+            raise ValueError(f"Invalid state: {state}. Valid states are: {valid_states}")
 
     # --- Core Actions ---
     def _attack_z(self) -> None:
@@ -244,6 +251,16 @@ class Character(ABC):
     def _one_loop_actions(self) -> List[str]:
         """Return a list of actions that should only run once per input."""
         return ['atk_z', 'atk_x', 'atk_c', 'hit', 'jump']
+
+    def get_broadcast_data(self) -> dict:
+        """Return a dictionary with character data for broadcasting."""
+        return {
+            'x': self._rect.x,
+            'y': self._rect.y,
+            'hp': self.__current_hp,
+            'flipped': self._flipped,
+            'state': self._state,
+        }
 
     # --- Update & Animation ---
     def update(self, screen: pygame.Surface, delta_time: float) -> None:
