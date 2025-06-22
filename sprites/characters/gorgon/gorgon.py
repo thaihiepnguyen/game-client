@@ -6,8 +6,8 @@ from sprites.characters.gorgon.gorgon_animation import GorgonAnimation
 
 
 class Gorgon(Character):
-    def __init__(self, x: float, y: float, animation: GorgonAnimation):
-        super().__init__(x, y, animation)
+    def __init__(self, animation: GorgonAnimation):
+        super().__init__(animation)
 
     @override
     def _jump(self) -> None:

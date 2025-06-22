@@ -10,8 +10,8 @@ from sprites.characters.fighter.fighter_animation import FighterAnimation
 import pygame
 
 class Fighter(Character):
-    def __init__(self, x: float, y: float, animation: FighterAnimation):
-        super().__init__(x, y, animation)
+    def __init__(self, animation: FighterAnimation):
+        super().__init__(animation)
         self.__kick_way_box = None
 
     @override

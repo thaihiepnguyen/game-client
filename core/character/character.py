@@ -9,7 +9,7 @@ from core.character.character_animation import CharacterAnimation
 from typing import List
 
 class Character(ABC):
-    def __init__(self, x: float, y: float, character_animation: CharacterAnimation):
+    def __init__(self, character_animation: CharacterAnimation):
         # --- Stats ---
         self.__max_hp = 100
         self.__current_hp = self.__max_hp
@@ -34,8 +34,8 @@ class Character(ABC):
         self.__invincibility_time = 0
 
         # --- Graphics & Hitboxes ---
-        self._rect = pygame.Rect(x, y, CHARACTER_WIDTH, CHARACTER_HEIGHT)
-        self._shadow_rect = pygame.Rect(x, y, SHADOW_WIDTH, SHADOW_HEIGHT)
+        self._rect = pygame.Rect(0, 0, CHARACTER_WIDTH, CHARACTER_HEIGHT)
+        self._shadow_rect = pygame.Rect(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT)
         self._character_animation = character_animation
         self.__atk_rect = None
 
@@ -87,6 +87,21 @@ class Character(ABC):
     def get_armor(self) -> float: return self.__armor
     def is_dead(self) -> bool: return self.__current_hp <= 0
     def is_defend(self) -> bool: return self._state == 'def'
+
+    # --- Public Setters ---
+    def set_x(self, x: int) -> None:
+        """
+        Set the x-coordinate of the character's position.
+        Ensures the character does not move out of bounds.
+        """
+        self._rect.x = max(0, min(x, WINDOW_WIDTH - self._rect.width))
+
+    def set_y(self, y: int) -> None:
+        """
+        Set the y-coordinate of the character's position.
+        Ensures the character does not move out of bounds.
+        """
+        self._rect.y = max(0, y)
 
     # --- Core Actions ---
     def _attack_z(self) -> None:

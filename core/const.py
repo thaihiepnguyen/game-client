@@ -25,6 +25,9 @@ PORT = 8081
 LITTLE_BYTE_ORDER = "little"  # Byte order for network packets
 HEADER_SIZE = 8  # Size of the packet header in bytes
 
+class CommandId(Enum):
+    WAIT_FOR_MATCH = 1
+
 # Constants for scene management
 MAIN_MENU_SCENE = "main_menu"
 MAIN_SCENE = "main"
@@ -37,3 +40,21 @@ ATTACK_COOLDOWN = 500
 class Colors(Enum):
     RED = (255, 0, 0)
     BLACK = (0, 0, 0, 80)
+    WHITE = (255, 255, 255)
+
+
+# Constarts for characters
+class CharacterId(Enum):
+    ARCHER = 1
+    FIGHTER = 2
+    GORGON = 3
+    VAMPIRE = 4
+    WIZARD = 5
+    TENGU = 6
+
+class BackgroundId(Enum):
+    BRIDGE = 1
+    COUNTRY_SIDE = 2
+    STREET = 3
+    TEMPLE = 4
+    TOKYO = 5

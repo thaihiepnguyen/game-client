@@ -1,11 +1,22 @@
 import pygame
 from abc import ABC, abstractmethod
 
+from core.network.tcp_client import TCPClient
+
 
 class Scene(ABC):
-    def __init__(self, scene_manager): # can not define type of this variable because of cicular dependency
+    def __init__(self, scene_manager, tcp_client: TCPClient): # can not define type of this variable because of cicular dependency
         super().__init__()
         self._scene_manager = scene_manager
+        self._tcp_client = tcp_client
+    
+    def _on_enter(self, data=None) -> None:
+        """
+        Called when the scene is entered.
+        This method can be overridden to perform any setup or initialization tasks.
+        :param data: Optional data to initialize the scene with.
+        """
+        pass
 
     @abstractmethod
     def draw(self, screen: pygame.Surface) -> None:

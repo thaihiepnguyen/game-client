@@ -1,12 +1,14 @@
+from core.network.tcp_client import TCPClient
 from scenes.battle_scene import BattleScene
 from scenes.main_scene import MainScene
 from core.scene import scene
 from core.const import *
 
 class SceneManager:
-    def __init__(self):
-        self.scenes = {}
-        self.current_scene = None
+    def __init__(self, tcp_client: TCPClient):
+        self.__scenes = {}
+        self.__current_scene = None
+        self._tcp_client = tcp_client
 
     def _add_scene(self, name: str, scene: type[scene.Scene]) -> None:
         """
@@ -14,7 +16,7 @@ class SceneManager:
         :param name: The name of the scene to add.
         :param scene: The scene class to add, which should inherit from Scene.Scene.
         """
-        self.scenes[name] = scene(self)
+        self.__scenes[name] = scene(self, self._tcp_client)
 
     def initialize(self) -> None:
         """
@@ -30,13 +32,15 @@ class SceneManager:
         for name, scene_class in scenes.items():
             self._add_scene(name, scene_class)
 
-    def set_scene(self, name: str) -> None:
+    def set_scene(self, name: str, data=None) -> None:
         """
         Set the current scene by name.
         :param name: The name of the scene to set as current.
         """
-        if name in self.scenes:
-            self.current_scene = self.scenes[name]
+        if name in self.__scenes:
+            self.__current_scene = self.__scenes[name]
+            if data is not None:
+                self.__current_scene._on_enter(data)
         else:
             raise ValueError(f"Scene '{name}' not found in SceneManager.")
     
@@ -45,4 +49,4 @@ class SceneManager:
         Get the current scene.
         :return: The current scene instance.
         """
-        return self.current_scene
+        return self.__current_scene

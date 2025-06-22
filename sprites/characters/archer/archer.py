@@ -12,8 +12,8 @@ from sprites.characters.archer.arrow.arrow import Arrow
 
 
 class Archer(Character):
-    def __init__(self, x: float, y: float, animation: ArcherAnimation):
-        super().__init__(x, y, animation)
+    def __init__(self, animation: ArcherAnimation):
+        super().__init__(animation)
         self.__arrows = []
 
     @override

@@ -1,48 +1,67 @@
 from typing import override
 
+from core.background.background_factory import BackgroundFactory
+from core.character.character_factory import CharacterFactory
 from core.scene.scene import Scene
-from sprites.backgrounds.bridge.bridge_animation import BridgeAnimation
-from sprites.backgrounds.countryside.countryside_animation import CountrysideAnimation
-from sprites.backgrounds.temple.temple_animation import TempleAnimation
-from sprites.backgrounds.tokyo.tokyo_animation import TokyoAnimation
-from sprites.characters.archer.archer import Archer
-from sprites.characters.archer.archer_animation import ArcherAnimation
-from sprites.characters.fighter.fighter import Fighter
-from sprites.characters.fighter.fighter_animation import FighterAnimation
-from sprites.characters.gorgon.gorgon import Gorgon
-from sprites.characters.gorgon.gorgon_animation import GorgonAnimation
-from sprites.characters.yamabushi_tengu.yamabushi_tengu import YamabushiTengu
-from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import YamabushiTenguAnimation
-from sprites.backgrounds.street.street_animation import StreetAnimation
-
 from sprites.health_bar.health_bar import HealthBar
 from core.const import CHARACTER_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH
 import pygame
 
 class BattleScene(Scene):
-    def __init__(self, scene_manager):
-        super().__init__(scene_manager)
-        self.__bg_animation = CountrysideAnimation()
-        self.__fighter = Archer(
-            x=100, 
-            y=200,
-            animation=ArcherAnimation(),
-        )
-        self.__health_bar_tl = HealthBar(
-            pos='topleft',
-            character=self.__fighter
-        )
-        self.__opponent = Gorgon(
-            x=WINDOW_WIDTH - 100 - CHARACTER_WIDTH,
-            y=200,
-            animation=GorgonAnimation(),
-        )
-        self.__health_bar_tr = HealthBar(
-            pos='topright',
-            character=self.__opponent
-        )
+    def __init__(self, scene_manager, tcp_client):
+        super().__init__(scene_manager, tcp_client)
+        self.__room_id = None
+        self.__char = None
+        self.__oppo = None
+        self.__bg = None
+        self.__side = None
+        self.__bg_animation = None
+        self.__fighter = None
+        self.__opponent = None
+        self.__health_bar_tl = None
+        self.__health_bar_tr = None
+
+    @override
+    def _on_enter(self, data: dict):
+        self.__room_id = data.get('room_id', None)
+        self.__char = data.get('char', None)
+        self.__oppo = data.get('oppo', None)
+        self.__bg = data.get('bg', None)
+        self.__side = data.get('side', None)
+        print(f"BattleScene: Entering with room_id={self.__room_id}, char={self.__char}, oppo={self.__oppo}, bg={self.__bg}, side={self.__side}")
+
+        self.__bg_animation = BackgroundFactory.create_background(self.__bg)
+        self.__fighter = CharacterFactory.create_character(self.__char)
+        self.__opponent = CharacterFactory.create_character(self.__oppo)
+        if not self.__side: # if character is on the left side
+            self.__fighter.set_x(100)
+            self.__fighter.set_y(200)
+            self.__health_bar_tl = HealthBar(
+                pos='topleft',
+                character=self.__fighter
+            )
+            self.__opponent.set_x(WINDOW_WIDTH - 100 - CHARACTER_WIDTH)
+            self.__opponent.set_y(200)
+            self.__health_bar_tr = HealthBar(
+                pos='topright',
+                character=self.__opponent
+            )
+        else:  # if character is on the right side
+            self.__fighter.set_x(WINDOW_WIDTH - 100 - CHARACTER_WIDTH)
+            self.__fighter.set_y(200)
+            self.__health_bar_tl = HealthBar(
+                pos='topright',
+                character=self.__fighter
+            )
+            self.__opponent.set_x(100)
+            self.__opponent.set_y(200)
+            self.__health_bar_tr = HealthBar(
+                pos='topleft',
+                character=self.__opponent
+            )
 
     def draw(self, screen: pygame.Surface) -> None:
+        if self.__bg_animation is None or self.__fighter is None or self.__opponent is None: return
         scaled_bg_image = pygame.transform.scale(self.__bg_animation.get_current_frame(), (WINDOW_WIDTH, WINDOW_HEIGHT))
         screen.blit(scaled_bg_image, (0, 0))
         self.__fighter.draw(screen)
@@ -53,9 +72,11 @@ class BattleScene(Scene):
         self.__opponent.look_at(self.__fighter)
 
     def handle_event(self, event: pygame.event.Event):
+        if self.__fighter is None: return
         self.__fighter.handle_event(event)
 
     def update(self, screen: pygame.Surface, delta_time: float):
+        if self.__bg_animation is None or self.__fighter is None or self.__opponent is None: return
         self.__bg_animation.update(delta_time)
 
         ground_y = WINDOW_HEIGHT * self.__bg_animation.get_ground_y_ratio()

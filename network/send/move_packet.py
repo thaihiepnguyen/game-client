@@ -3,11 +3,11 @@
 
 from typing import Self
 from core.const import HEADER_SIZE, LITTLE_BYTE_ORDER
-from core.network.packet import Packet
+from core.network.send_packet import SendPacket
 from core.network.packet_header import PacketHeader
 
 
-class MovePacket(Packet):
+class MovePacket(SendPacket):
     def __init__(self, header: PacketHeader, x: int, y: int):
         super().__init__(header)
         self.x = x

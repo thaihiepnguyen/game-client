@@ -8,8 +8,8 @@ from sprites.characters.yamabushi_tengu.yamabushi_tengu_animation import Yamabus
 import pygame
 
 class YamabushiTengu(Character):
-    def __init__(self, x: float, y: float, animation: YamabushiTenguAnimation):
-        super().__init__(x, y, animation)
+    def __init__(self, animation: YamabushiTenguAnimation):
+        super().__init__(animation)
 
     @override
     def handle_input(self, keys: ScancodeWrapper, delta_time: float) -> None:

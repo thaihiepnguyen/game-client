@@ -3,10 +3,18 @@ import sys
 import pygame
 
 from core.const import *
+from core.network.tcp_client import TCPClient
 from core.scene.scene_manager import SceneManager
 
 class Application:
     def __init__(self):
+        self.__tcp_client = TCPClient(HOST, PORT)
+        try:
+            self.__tcp_client.connect()
+        except Exception as e:
+            print(f"Failed to connect to server: {e}")
+            sys.exit()
+
         pygame.init()
         pygame.mixer.init()
         sound1 = pygame.mixer.Sound(SOUND_BACKGROUND)
@@ -15,10 +23,9 @@ class Application:
         pygame.display.set_caption(WINDOW_TITLE)
 
         self.__clock = pygame.time.Clock()
-        self.__scene_manager = SceneManager()
+        self.__scene_manager = SceneManager(self.__tcp_client)
         self.__scene_manager.initialize()
-        self.__scene_manager.set_scene(BATTLE_SCENE)
-
+        self.__scene_manager.set_scene(MAIN_SCENE)
 
     def run(self):
         """
@@ -30,6 +37,7 @@ class Application:
             for event in pygame.event.get():
                 scene.handle_event(event)
                 if event.type == pygame.QUIT:
+                    self.__tcp_client.close()
                     pygame.quit()
                     sys.exit()
 
