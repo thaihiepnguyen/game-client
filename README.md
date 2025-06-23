@@ -7,9 +7,9 @@
 ```bash
 python3 -m venv venv
 
-source venv/bin/active
+source venv/bin/activate
 
-pip3 -r install -r requirements.txt 
+pip3 install -r requirements.txt 
 ```
 
 ### 3. Run project

@@ -10,7 +10,7 @@ class Scene(ABC):
         self._scene_manager = scene_manager
         self._tcp_client = tcp_client
     
-    def _on_enter(self, data=None) -> None:
+    def _on_enter(self, data=dict | None) -> None:
         """
         Called when the scene is entered.
         This method can be overridden to perform any setup or initialization tasks.

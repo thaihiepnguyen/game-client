@@ -21,7 +21,7 @@ class SendBroadcastPacket(SendPacket):
         """
         result = self.header.to_bytes() + self.x.to_bytes(4, LITTLE_BYTE_ORDER) \
                 + self.y.to_bytes(4, LITTLE_BYTE_ORDER) + self.hp.to_bytes(4, LITTLE_BYTE_ORDER) \
-                + (1 if self.flipped else 0).to_bytes(1, LITTLE_BYTE_ORDER) \
+                + self.flipped.to_bytes(1, LITTLE_BYTE_ORDER) \
                 + self.state.to_bytes(4, LITTLE_BYTE_ORDER)
 
         return result

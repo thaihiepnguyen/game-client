@@ -12,7 +12,7 @@ class Character(ABC):
     def __init__(self, character_animation: CharacterAnimation):
         # --- Stats ---
         self.__max_hp = 100
-        self.__current_hp = self.__max_hp
+        self.__current_hp: int = self.__max_hp
         self.__atk_z, self.__atk_x, self.__atk_c = self._set_atk()
         self.__armor = self._set_armor()
         self.__attack_count_down = self._set_attack_count_down()
@@ -75,7 +75,7 @@ class Character(ABC):
 
     # --- Public Getters ---
     def get_rect(self) -> Rect: return self._rect
-    def get_hp(self) -> float: return self.__current_hp
+    def get_hp(self) -> int: return self.__current_hp
     def get_max_hp(self) -> float: return self.__max_hp
     def get_atk(self) -> float:
         if self._state == 'atk_z':
@@ -95,8 +95,8 @@ class Character(ABC):
     def set_y(self, y: int) -> None:
         self._rect.y = max(0, y)
     
-    def set_hp(self, hp: float) -> None:
-        self.__current_hp = max(0.0, min(hp, self.__max_hp))
+    def set_hp(self, hp: int) -> None:
+        self.__current_hp = max(0, min(hp, self.__max_hp))
 
     def set_flipped(self, flipped: bool) -> None:
         """Set the flipped state of the character, affecting direction."""
@@ -146,12 +146,12 @@ class Character(ABC):
     def _defend(self) -> None:
         self._state = 'def'
 
-    def take_damage(self, damage: float, knock_back: int = 15) -> None:
+    def take_damage(self, damage: int, knock_back: int = 15) -> None:
         if self.__is_invincible:
             return
 
         self._state = 'hit'
-        self.__current_hp = max(0.0, self.__current_hp - damage)
+        self.__current_hp = max(0, self.__current_hp - damage)
 
         self.__is_invincible = True
         self.__invincibility_time = pygame.time.get_ticks()
