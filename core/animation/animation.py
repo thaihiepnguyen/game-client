@@ -30,10 +30,7 @@ class Animation:
         if self.__time_since_last_frame >= self.__frame_duration:
             self.__current_frame_index = (self.__current_frame_index + 1) % len(self.__frames)
             if self.is_complete():
-                for callback in self.__on_complete_subscribers:
-                    callback(self)
-
-                self.__on_complete_subscribers = []
+                self.complete()
             self.__time_since_last_frame = 0.0
 
     def get_current_frame(self, flip: bool = False, darken: int = 0) -> pygame.Surface:
@@ -61,6 +58,12 @@ class Animation:
     def is_complete(self) -> bool:
         """Check if the animation has completed."""
         return self.__current_frame_index == len(self.__frames) - 1
+
+    def complete(self):
+        """Complete the animation immediately."""
+        for callback in self.__on_complete_subscribers:
+            callback(self)
+        self.__on_complete_subscribers = []
 
     def get_sprite(self):
         """Get the sprite associated with the animation."""

@@ -1,6 +1,7 @@
 from typing import override
 
 from core.background.background_factory import BackgroundFactory
+from core.character.character import Character
 from core.character.character_factory import CharacterFactory
 from core.scene.scene import Scene
 from network.recv.recv_broadcast_packet import RecvBroadcastPacket
@@ -15,15 +16,10 @@ import threading
 class BattleScene(Scene):
     def __init__(self, scene_manager, tcp_client):
         super().__init__(scene_manager, tcp_client)
-        self.__char = None
-        self.__oppo = None
-        self.__bg = None
-        self.__side = None
-        self.__bg_animation = None
-        self.__fighter = None
-        self.__opponent = None
-        self.__health_bar_tl = None
-        self.__health_bar_tr = None
+        self.__char = self.__oppo = self.__bg = self.__side = None
+        self.__bg_animation = self.__fighter = self.__opponent = None
+        self.__health_bar_tl = self.__health_bar_tr = None
+        self.__opponent_arrow = self.__fighter_arrow = None
 
     @override
     def _on_enter(self, data: dict | None) -> None:
@@ -40,10 +36,7 @@ class BattleScene(Scene):
             (100, 'topleft'),
             (WINDOW_WIDTH - 100 - CHARACTER_WIDTH, 'topright')
         ]
-        if not self.__side:  # character is on the left
-            fighter_idx, opponent_idx = 0, 1
-        else:  # character is on the right
-            fighter_idx, opponent_idx = 1, 0
+        fighter_idx, opponent_idx = (0, 1) if not self.__side else (1, 0)
 
         self.__fighter.set_x(positions[fighter_idx][0])
         self.__fighter.set_y(200)
@@ -59,8 +52,7 @@ class BattleScene(Scene):
             character=self.__fighter if fighter_idx == 1 else self.__opponent
         )
         
-        thread = threading.Thread(target=self.__recv_worker)
-        thread.start()
+        threading.Thread(target=self.__recv_worker, daemon=True).start()
 
     def _send_broadcast_packet(self, data: dict):
         header = PacketHeader(CommandId.BROADCAST.value, 4 * 4 + 1) 
@@ -75,6 +67,10 @@ class BattleScene(Scene):
         self._tcp_client.send(packet.to_bytes())
 
     def __recv_worker(self):
+        """
+        This method is intended to run in a separate thread to handle network communication.
+        :return:
+        """
         while True:
             res = self._tcp_client.recv()
             packet_header = PacketHeader.from_bytes(res[:HEADER_SIZE])
@@ -86,8 +82,24 @@ class BattleScene(Scene):
                 self.__opponent.set_flipped(packet.flipped)
                 self.__opponent.set_state(CHARACTER_REVERSIBLE_STATES[packet.state])
 
+    def __update_arrow(self, arrow_attr: str, owner: Character, screen: pygame.Surface, delta_time: float):
+        """
+        Update and draw the arrow for the given owner character.
+        """
+        arrow = getattr(self, arrow_attr, None)
+        if arrow is None and hasattr(owner, 'get_arrow'):
+            arrow = owner.get_arrow()
+            setattr(self, arrow_attr, arrow)
+        if arrow:
+            arrow.update(delta_time)
+            if arrow.get_rect().x < 0 or arrow.get_rect().x > WINDOW_WIDTH:
+                setattr(self, arrow_attr, None)
+            else:
+                arrow.draw(screen)
+        return arrow
+
     def draw(self, screen: pygame.Surface) -> None:
-        if self.__bg_animation is None or self.__fighter is None or self.__opponent is None: return
+        if not all([self.__bg_animation, self.__fighter, self.__opponent]): return
         scaled_bg_image = pygame.transform.scale(self.__bg_animation.get_current_frame(), (WINDOW_WIDTH, WINDOW_HEIGHT))
         screen.blit(scaled_bg_image, (0, 0))
         self.__fighter.draw(screen)
@@ -102,7 +114,7 @@ class BattleScene(Scene):
         self.__fighter.handle_event(event)
 
     def update(self, screen: pygame.Surface, delta_time: float):
-        if self.__bg_animation is None or self.__fighter is None or self.__opponent is None: return
+        if not all([self.__bg_animation, self.__fighter, self.__opponent]): return
         self.__bg_animation.update(delta_time)
 
         ground_y = WINDOW_HEIGHT * self.__bg_animation.get_ground_y_ratio()
@@ -110,38 +122,33 @@ class BattleScene(Scene):
         self.__opponent.apply_gravity(ground_y, delta_time)
 
         if self.__fighter.is_dead():
-            # game end logic can be handled here
-            pass
+            pass  # Game end logic placeholder
 
-        opponent_atk_hitbox = self.__opponent.get_attack_hitbox(screen)
         fighter_hurt_box = self.__fighter.get_rect()
+        opponent_atk_hitbox = self.__opponent.get_attack_hitbox(screen)
+        get_kick_away_box = getattr(self.__opponent, 'get_kick_away_box', None)
 
-        get_kick_away_box = self.__opponent.get_kick_away_box() if hasattr(self.__opponent, 'get_kick_away_box') else None
-        arrows = self.__opponent.get_arrows() if hasattr(self.__opponent, 'get_arrows') else []
+        # Damage logic
+        if get_kick_away_box and get_kick_away_box.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
+            self.__fighter.take_damage(int(max(0, self.__opponent.get_atk() - self.__fighter.get_armor()), 200))
 
-        if get_kick_away_box is not None:
-            if get_kick_away_box.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
-                self.__fighter.take_damage(int(max(0, self.__opponent.get_atk() - self.__fighter.get_armor()), 200))
+        if opponent_atk_hitbox and opponent_atk_hitbox.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
+            intersection = opponent_atk_hitbox.clip(fighter_hurt_box)
+            damage_ratio = intersection.width / self.__fighter.get_rect().width
+            damage = self.__opponent.get_atk() * damage_ratio - self.__fighter.get_armor()
+            self.__fighter.take_damage(int(max(0, damage)))
 
-        if opponent_atk_hitbox is not None:
-            if opponent_atk_hitbox.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
-                intersection = opponent_atk_hitbox.clip(fighter_hurt_box)
-                damage_ratio = intersection.width / self.__fighter.get_rect().width
-                damage = self.__opponent.get_atk() * damage_ratio - self.__fighter.get_armor()
-                self.__fighter.take_damage(int(max(0, damage)))
+        # Arrow logic
+        self.__opponent_arrow = self.__update_arrow('__opponent_arrow', self.__opponent, screen, delta_time)
+        self.__fighter_arrow = self.__update_arrow('__fighter_arrow', self.__fighter, screen, delta_time)
 
-        if len(arrows) != 0:
-            for arrow in arrows:
-                if arrow.get_rect().colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
-                    damage = arrow.get_damage() - self.__fighter.get_armor()
-                    self.__fighter.take_damage(int(max(0.0, damage)))
+        if self.__opponent_arrow and self.__opponent_arrow.get_rect().colliderect(
+                fighter_hurt_box) and not self.__fighter.is_defend():
+            damage = self.__opponent_arrow.get_damage() - self.__fighter.get_armor()
+            self.__fighter.take_damage(int(max(0.0, damage)))
 
         self.__fighter.update(screen, delta_time)
         self.__opponent.update(screen, delta_time)
 
-        broadcast_data = self.__fighter.get_broadcast_data()
-
-        self._send_broadcast_packet(broadcast_data)
-
-        keys = pygame.key.get_pressed()
-        self.__fighter.handle_input(keys, delta_time)
+        self._send_broadcast_packet(self.__fighter.get_broadcast_data())
+        self.__fighter.handle_input(pygame.key.get_pressed(), delta_time)

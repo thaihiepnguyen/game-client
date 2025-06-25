@@ -21,6 +21,7 @@ class CharacterAnimation(ABC):
         """
         if action_type in self.__animations and self.__animations[action_type] is not None:
             if self.__current_action != action_type:
+                self.__animations[self.__current_action].complete()
                 self.__animations[self.__current_action].reset()
                 self.__current_action = action_type
             self.__animations[self.__current_action].update(delta_time)

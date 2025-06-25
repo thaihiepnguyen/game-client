@@ -14,6 +14,7 @@ from sprites.characters.archer.arrow.arrow import Arrow
 class Archer(Character):
     def __init__(self, animation: ArcherAnimation):
         super().__init__(animation)
+        self.__is_subscribed_on_complete = False
         self.__arrows = []
 
     @override
@@ -26,16 +27,6 @@ class Archer(Character):
                 self.__arrows.remove(arrow)
             else:
                 arrow.draw(screen)
-
-    def __on_shoot_animation_complete(self, _: None):
-        self.__arrows.append(Arrow(self._rect.right, self._rect.centery - 40, self._flipped))
-
-    @override
-    def _attack_c(self):
-        super()._attack_c()
-        self._character_animation.get_animation_by_action(self._state).subscribe_on_complete(
-            self.__on_shoot_animation_complete
-        )
 
     @override
     def get_atk_z_box(self) -> Rect:
@@ -57,9 +48,6 @@ class Archer(Character):
     def get_atk_c_box(self) -> Rect | None:
         return None
 
-    def get_arrows(self) -> list[Arrow]:
-        return self.__arrows
-
     def _set_speed(self) -> float:
         return 300
 
@@ -78,3 +66,18 @@ class Archer(Character):
 
     def _set_armor(self) -> float:
         return 1
+
+    def __on_shoot_animation_complete(self, _: None):
+        self.__arrows.append(Arrow(self._rect.right, self._rect.centery - 40, self._flipped))
+        self.__is_subscribed_on_complete = False
+
+    def get_arrow(self) -> Arrow | None:
+        if self.__is_subscribed_on_complete:
+            return None
+
+        self._character_animation.get_animation_by_action('atk_c').subscribe_on_complete(
+            self.__on_shoot_animation_complete
+        )
+
+        self.__is_subscribed_on_complete = True
+        return self.__arrows.pop() if len(self.__arrows) > 0 else None
