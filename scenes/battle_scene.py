@@ -7,7 +7,7 @@ from core.scene.scene import Scene
 from network.recv.recv_broadcast_packet import RecvBroadcastPacket
 from sprites.health_bar.health_bar import HealthBar
 from core.const import CHARACTER_REVERSIBLE_STATES, CHARACTER_STATES, CHARACTER_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH, \
-    CommandId, HEADER_SIZE
+    CommandId, HEADER_SIZE, MAIN_SCENE
 import pygame
 from network.send.send_broadcast_packet import SendBroadcastPacket
 from core.network.packet_header import PacketHeader
@@ -81,6 +81,9 @@ class BattleScene(Scene):
                 self.__opponent.set_hp(packet.hp)
                 self.__opponent.set_flipped(packet.flipped)
                 self.__opponent.set_state(CHARACTER_REVERSIBLE_STATES[packet.state])
+            elif packet_header.command_id == CommandId.OPPONENT_OUT.value:
+                self._scene_manager.set_scene(MAIN_SCENE)
+                return
 
     def __update_arrow(self, arrow_attr: str, owner: Character, screen: pygame.Surface, delta_time: float):
         """
@@ -129,8 +132,10 @@ class BattleScene(Scene):
         get_kick_away_box = getattr(self.__opponent, 'get_kick_away_box', None)
 
         # Damage logic
-        if get_kick_away_box and get_kick_away_box.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
-            self.__fighter.take_damage(int(max(0, self.__opponent.get_atk() - self.__fighter.get_armor()), 200))
+        if getattr(self.__opponent, 'get_kick_away_box', None):
+            get_kick_away_box = self.__opponent.get_kick_away_box()
+            if get_kick_away_box and get_kick_away_box.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
+                self.__fighter.take_damage(int(max(0, self.__opponent.get_atk() - self.__fighter.get_armor()), 200))
 
         if opponent_atk_hitbox and opponent_atk_hitbox.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
             intersection = opponent_atk_hitbox.clip(fighter_hurt_box)

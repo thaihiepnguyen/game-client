@@ -28,6 +28,7 @@ HEADER_SIZE = 8  # Size of the packet header in bytes
 class CommandId(Enum):
     WAIT_FOR_MATCH = 1
     BROADCAST = 2
+    OPPONENT_OUT = 3
     
 
 # Constants for scene management

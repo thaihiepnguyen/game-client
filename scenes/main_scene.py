@@ -59,8 +59,7 @@ class MainScene(Scene):
                     packet = WaitForMatchPacket(header)
                     self._tcp_client.send(packet.to_bytes())
 
-                    thread = threading.Thread(target=self.__recv_worker)
-                    thread.start()
+                    threading.Thread(target=self.__recv_worker).start()
                 elif self.cnt == 1:
                     pygame.quit()
                     exit()
