@@ -6,7 +6,7 @@ from core.const import *
 from core.network.tcp_client import TCPClient
 from core.scene.scene_manager import SceneManager
 
-class Application:
+class FightinGameApplication:
     def __init__(self):
         self.__tcp_client = TCPClient(HOST, PORT)
         try:
@@ -16,9 +16,9 @@ class Application:
             sys.exit()
 
         pygame.init()
-        # pygame.mixer.init()
-        # sound1 = pygame.mixer.Sound(SOUND_BACKGROUND)
-        # sound1.play(-1)
+        pygame.mixer.init()
+        sound1 = pygame.mixer.Sound(SOUND_BACKGROUND)
+        sound1.play(-1)
         self.__screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption(WINDOW_TITLE)
 

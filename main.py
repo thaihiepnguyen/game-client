@@ -1,5 +1,5 @@
-from core.app import Application
+from core.app import FightinGameApplication
 
 if __name__ == "__main__":
-    app = Application()
+    app = FightinGameApplication()
     app.run()
