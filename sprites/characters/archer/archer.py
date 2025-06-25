@@ -3,10 +3,7 @@ from typing import override
 from pygame import Rect
 
 from core.character.character import Character
-from core.const import WINDOW_WIDTH
 from sprites.characters.archer.archer_animation import ArcherAnimation
-
-import pygame
 
 from sprites.characters.archer.arrow.arrow import Arrow
 
@@ -16,17 +13,6 @@ class Archer(Character):
         super().__init__(animation)
         self.__is_subscribed_on_complete = False
         self.__arrows = []
-
-    @override
-    def update(self, screen: pygame.Surface, delta_time: float):
-        super().update(screen, delta_time)
-
-        for arrow in self.__arrows:
-            arrow.update(delta_time)
-            if arrow.get_rect().x < 0 or arrow.get_rect().x > WINDOW_WIDTH:
-                self.__arrows.remove(arrow)
-            else:
-                arrow.draw(screen)
 
     @override
     def get_atk_z_box(self) -> Rect:
@@ -45,7 +31,13 @@ class Archer(Character):
         return Rect(x, y, w, h)
 
     @override
+    def _attack_c(self) -> None:
+        super()._attack_c()
+        self.__add_on_shoot_animation_complete()
+
+    @override
     def get_atk_c_box(self) -> Rect | None:
+        self.__add_on_shoot_animation_complete()
         return None
 
     def _set_speed(self) -> float:
@@ -67,17 +59,16 @@ class Archer(Character):
     def _set_armor(self) -> float:
         return 1
 
+    def __add_on_shoot_animation_complete(self) -> None:
+        if not self.__is_subscribed_on_complete:
+            self._character_animation.get_animation_by_action('atk_c').subscribe_on_complete(
+                self.__on_shoot_animation_complete
+            )
+            self.__is_subscribed_on_complete = True
+
     def __on_shoot_animation_complete(self, _: None):
-        self.__arrows.append(Arrow(self._rect.right, self._rect.centery - 40, self._flipped))
+        self.__arrows.append(Arrow(self._rect.right if not self._flipped else self._rect.x, self._rect.centery - 40, self._flipped))
         self.__is_subscribed_on_complete = False
 
     def get_arrow(self) -> Arrow | None:
-        if self.__is_subscribed_on_complete:
-            return None
-
-        self._character_animation.get_animation_by_action('atk_c').subscribe_on_complete(
-            self.__on_shoot_animation_complete
-        )
-
-        self.__is_subscribed_on_complete = True
         return self.__arrows.pop() if len(self.__arrows) > 0 else None

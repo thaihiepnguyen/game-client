@@ -12,6 +12,7 @@ class Arrow:
         self.__image = pygame.transform.scale2x(self.__image)
         if is_flipped:
             self.__image = pygame.transform.flip(self.__image, True, False)
+            self.__rect.x -= self.__image.get_width()
         self.__speed = speed
 
     def get_rect(self):
