@@ -129,21 +129,24 @@ class BattleScene(Scene):
 
         fighter_hurt_box = self.__fighter.get_rect()
         opponent_atk_hitbox = self.__opponent.get_attack_hitbox(screen)
-        get_kick_away_box = getattr(self.__opponent, 'get_kick_away_box', None)
 
-        # Damage logic
-        if getattr(self.__opponent, 'get_kick_away_box', None):
-            get_kick_away_box = self.__opponent.get_kick_away_box()
-            if get_kick_away_box and get_kick_away_box.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
-                self.__fighter.take_damage(int(max(0, self.__opponent.get_atk() - self.__fighter.get_armor()), 200))
-
+        # Take Damage Logic
         if opponent_atk_hitbox and opponent_atk_hitbox.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
             intersection = opponent_atk_hitbox.clip(fighter_hurt_box)
             damage_ratio = intersection.width / self.__fighter.get_rect().width
             damage = self.__opponent.get_atk() * damage_ratio - self.__fighter.get_armor()
             self.__fighter.take_damage(int(max(0, damage)))
 
-        # Arrow logic
+        # Fighter Kick Logic
+        if getattr(self.__opponent, 'get_kick_away_box', None):
+            get_kick_away_box = self.__opponent.get_kick_away_box()
+            if get_kick_away_box and get_kick_away_box.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
+                self.__fighter.take_damage(
+                    damage=int(max(0, self.__opponent.get_atk() - self.__fighter.get_armor())),
+                    knock_back=200
+                )
+
+        # Archer Arrow Logic
         self.__opponent_arrow = self.__update_arrow('__opponent_arrow', self.__opponent, screen, delta_time)
         self.__fighter_arrow = self.__update_arrow('__fighter_arrow', self.__fighter, screen, delta_time)
 
@@ -155,5 +158,6 @@ class BattleScene(Scene):
         self.__fighter.update(screen, delta_time)
         self.__opponent.update(screen, delta_time)
 
+        # Send broadcast packet with fighter's state
         self._send_broadcast_packet(self.__fighter.get_broadcast_data())
         self.__fighter.handle_input(pygame.key.get_pressed(), delta_time)

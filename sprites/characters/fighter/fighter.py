@@ -12,6 +12,7 @@ import pygame
 class Fighter(Character):
     def __init__(self, animation: FighterAnimation):
         super().__init__(animation)
+        self.__is_subscribed_on_complete = False
         self.__kick_way_box = None
 
     @override
@@ -21,26 +22,14 @@ class Fighter(Character):
             self._defend()
 
     @override
-    def get_atk_c_box(self) -> Rect | None:
-        return None
-
-    def get_kick_away_box(self) -> Rect | None:
-        return self.__kick_way_box
-
-    def __on_kick_animation_complete(self, _=None) -> None:
-        self.__kick_way_box = None
-
-    @override
     def _attack_c(self) -> None:
         super()._attack_c()
-        (self._character_animation.get_animation_by_action(self._state)
-         .subscribe_on_complete(self.__on_kick_animation_complete))
+        self.__add_on_kick_animation_complete()
 
-        w = 1.2 * self._rect.width
-        h = 0.3 * self._rect.height
-        x = (self._rect.centerx - w) if self._flipped else self._rect.centerx
-        y = self._rect.y + self._rect.height * 0.5 - h * 0.5
-        self.__kick_way_box = Rect(x, y, w, h)
+    @override
+    def get_atk_c_box(self) -> Rect | None:
+        self.__add_on_kick_animation_complete()
+        return None
 
     @override
     def _set_attack_count_down(self) -> float:
@@ -65,3 +54,23 @@ class Fighter(Character):
 
     def _set_armor(self) -> float:
         return 3
+
+    def __add_on_kick_animation_complete(self) -> None:
+        if not self.__is_subscribed_on_complete:
+            self._character_animation.get_animation_by_action('atk_c').subscribe_on_complete(
+                self.__on_kick_animation_complete
+            )
+            self.__is_subscribed_on_complete = True
+
+    def __on_kick_animation_complete(self, _=None) -> None:
+        w = 1.2 * self._rect.width
+        h = 0.3 * self._rect.height
+        x = (self._rect.centerx - w) if self._flipped else self._rect.centerx
+        y = self._rect.y + self._rect.height * 0.5 - h * 0.5
+        self.__kick_way_box = Rect(x, y, w, h)
+        self.__is_subscribed_on_complete = False
+
+    def get_kick_away_box(self) -> Rect | None:
+        kick_way_box = self.__kick_way_box
+        self.__kick_way_box = None
+        return kick_way_box
