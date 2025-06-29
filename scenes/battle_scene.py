@@ -6,6 +6,7 @@ from core.scene.scene import Scene
 from network.recv.end_game_packet import EndGamePacket
 from network.recv.recv_broadcast_packet import RecvBroadcastPacket
 from network.send.atk_packet import AtkPacket
+from network.send.def_packet import DefPacket
 from network.send.move_packet import MovePacket
 from sprites.health_bar.health_bar import HealthBar
 from core.const import CHARACTER_REVERSIBLE_STATES, CHARACTER_WIDTH, FONT, WINDOW_HEIGHT, WINDOW_WIDTH, Colors, \
@@ -158,6 +159,9 @@ class BattleScene(Scene):
                 
                 if event.key == pygame.K_LSHIFT:
                     self.__fighter.defend()
+                    header = PacketHeader(command_id=CommandId.DEF.value, packet_length=4)
+                    packet = DefPacket(header, defense=1)
+                    self._tcp_client.send(packet.to_bytes())
 
             if event.type == pygame.KEYUP:
                 if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
@@ -167,6 +171,9 @@ class BattleScene(Scene):
                     self._tcp_client.send(packet.to_bytes())
                 if event.key == pygame.K_LSHIFT:
                     self.__fighter.undefend()
+                    header = PacketHeader(command_id=CommandId.DEF.value, packet_length=4)
+                    packet = DefPacket(header, defense=0)
+                    self._tcp_client.send(packet.to_bytes())
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:

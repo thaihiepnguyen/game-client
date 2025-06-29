@@ -25,7 +25,7 @@ class VampireAnimation(CharacterAnimation):
             h=128,
             count=7,
         )
-        return Animation(sprite=sprite, frame_duration=0.04)
+        return Animation(sprite=sprite, frame_duration=0.1)
 
     def _load_idle_animation(self) -> Animation:
         sprite = Sprite(
@@ -43,7 +43,7 @@ class VampireAnimation(CharacterAnimation):
             h=128,
             count=5,
         )
-        return Animation(sprite=sprite, frame_duration=0.05)
+        return Animation(sprite=sprite, frame_duration=0.1)
 
 
     def _load_attack_x_animation(self) -> Animation:

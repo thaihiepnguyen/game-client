@@ -29,6 +29,7 @@ class CommandId(Enum):
     WAIT_FOR_MATCH = 1
     BROADCAST = 2
     MOVE = 3
+    DEF = 4
     JUMP = 5
     ATK = 6
     END_GAME = 7
