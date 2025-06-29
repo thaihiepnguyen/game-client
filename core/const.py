@@ -28,16 +28,16 @@ HEADER_SIZE = 8  # Size of the packet header in bytes
 class CommandId(Enum):
     WAIT_FOR_MATCH = 1
     BROADCAST = 2
-    OPPONENT_OUT = 3
+    MOVE = 3
+    JUMP = 5
+    ATK = 6
+    END_GAME = 7
+
     
 
 # Constants for scene management
-MAIN_MENU_SCENE = "main_menu"
 MAIN_SCENE = "main"
 BATTLE_SCENE = "battle"
-
-# Constants for animations
-ATTACK_COOLDOWN = 500
 
 # Colors
 class Colors(Enum):

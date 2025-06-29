@@ -10,24 +10,9 @@ class Gorgon(Character):
         super().__init__(animation)
 
     @override
-    def _jump(self) -> None:
+    def jump(self) -> None:
         return
 
+    @override
     def _set_speed(self) -> float:
-        return 350
-
-    def _set_weight(self) -> float:
-        return 1
-
-    def _set_jump_velocity(self) -> float:
-        return 0
-
-    def _set_atk(self) -> tuple[float, float, float]:
-        return (
-            10,  # Attack power for 'z' attack
-            15,  # Attack power for 'x' attack
-            20   # Attack power for 'c' attack
-        )
-
-    def _set_armor(self) -> float:
-        return 3
+        return 300

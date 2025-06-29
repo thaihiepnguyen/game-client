@@ -8,8 +8,7 @@ from core.network.packet_header import PacketHeader
 
 
 class RoomPacket(RecvPacket):
-    def __init__(self, header: PacketHeader, char: int, oppo: int, bg: int, side: int):
-        super().__init__(header)
+    def __init__(self,char: int, oppo: int, bg: int, side: int):
         self.char = char
         self.oppo = oppo
         self.bg = bg
@@ -20,9 +19,8 @@ class RoomPacket(RecvPacket):
         """
         Deserializes the MovePacket from bytes.
         """
-        header = PacketHeader.from_bytes(data[:HEADER_SIZE])
         char = int.from_bytes(data[HEADER_SIZE:HEADER_SIZE + 4], LITTLE_BYTE_ORDER)
         oppo = int.from_bytes(data[HEADER_SIZE + 4:HEADER_SIZE + 8], LITTLE_BYTE_ORDER)
         bg = int.from_bytes(data[HEADER_SIZE + 8:HEADER_SIZE + 12], LITTLE_BYTE_ORDER)
         side = int.from_bytes(data[HEADER_SIZE + 12:HEADER_SIZE + 13], LITTLE_BYTE_ORDER)
-        return cls(header, char, oppo, bg, side)
+        return cls(char, oppo, bg, side)

@@ -74,9 +74,11 @@ class MainScene(Scene):
         """
         while True:
             res = self._tcp_client.recv()
+            
             if res:
-                packet = RoomPacket.from_bytes(res)
-                if packet.header.command_id == CommandId.WAIT_FOR_MATCH.value:
+                header = PacketHeader.from_bytes(res)
+                if header.command_id == CommandId.WAIT_FOR_MATCH.value:
+                    packet = RoomPacket.from_bytes(res)
                     self.is_waiting_for_match = False
                     self._scene_manager.set_scene(BATTLE_SCENE, {
                         'char': packet.char,

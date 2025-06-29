@@ -19,8 +19,7 @@ class BackgroundFactory:
         """
         Create a background object based on the specified type.
 
-        :param background_type: Type of the background to create.
-        :param kwargs: Additional parameters for the background.
+        :param id:
         :return: An instance of the specified background type.
         """
         if BackgroundId.TOKYO.value == id:

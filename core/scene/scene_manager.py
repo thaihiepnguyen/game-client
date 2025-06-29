@@ -40,7 +40,7 @@ class SceneManager:
         if name in self.__scenes:
             self.__current_scene = self.__scenes[name]
             if data is not None:
-                self.__current_scene._on_enter(data)
+                self.__current_scene.on_enter(data)
         else:
             raise ValueError(f"Scene '{name}' not found in SceneManager.")
     

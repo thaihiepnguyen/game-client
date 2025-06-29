@@ -1,15 +1,16 @@
 from typing import override
 
 from core.background.background_factory import BackgroundFactory
-from core.character.character import Character
 from core.character.character_factory import CharacterFactory
 from core.scene.scene import Scene
+from network.recv.end_game_packet import EndGamePacket
 from network.recv.recv_broadcast_packet import RecvBroadcastPacket
+from network.send.atk_packet import AtkPacket
+from network.send.move_packet import MovePacket
 from sprites.health_bar.health_bar import HealthBar
-from core.const import CHARACTER_REVERSIBLE_STATES, CHARACTER_STATES, CHARACTER_WIDTH, FONT, WINDOW_HEIGHT, WINDOW_WIDTH, Colors, \
+from core.const import CHARACTER_REVERSIBLE_STATES, CHARACTER_WIDTH, FONT, WINDOW_HEIGHT, WINDOW_WIDTH, Colors, \
     CommandId, HEADER_SIZE, MAIN_SCENE
 import pygame
-from network.send.send_broadcast_packet import SendBroadcastPacket
 from core.network.packet_header import PacketHeader
 import threading
 
@@ -18,29 +19,33 @@ class BattleScene(Scene):
         super().__init__(scene_manager, tcp_client)
         self.__timer_font = pygame.font.Font(FONT, 80)
         self.__timer = None
+        self.__last_time = 0
+        self.__result = None
         self.__is_end_game = False
+        self.__ground_y = 0
 
-        self.you_lost_text = pygame.font.Font(FONT, 64).render("YOU LOST!", True, Colors.WHITE.value)
-        self.you_lost_text_rect = self.you_lost_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3))
+        self.__you_lost_text = pygame.font.Font(FONT, 64).render("YOU LOST!", True, Colors.WHITE.value)
+        self.__you_lost_text_rect = self.__you_lost_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3))
 
-        self.you_win_text = pygame.font.Font(FONT, 64).render("YOU WIN!", True, Colors.WHITE.value)
-        self.you_win_text_rect = self.you_win_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3))
+        self.__you_win_text = pygame.font.Font(FONT, 64).render("YOU WIN!", True, Colors.WHITE.value)
+        self.__you_win_text_rect = self.__you_win_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3))
 
-        self.draw_text = pygame.font.Font(FONT, 64).render("DRAW!", True, Colors.WHITE.value)
-        self.draw_text_rect = self.draw_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3))
+        self.__draw_text = pygame.font.Font(FONT, 64).render("DRAW!", True, Colors.WHITE.value)
+        self.__draw_text_rect = self.__draw_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3))
 
-        self.enter_to_back_text = pygame.font.Font(FONT, 40).render("Press Enter to go back", True, Colors.WHITE.value)
-        self.enter_to_back_text_rect = self.enter_to_back_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        self.__enter_to_back_text = pygame.font.Font(FONT, 40).render("Press Enter to go back", True, Colors.WHITE.value)
+        self.__enter_to_back_text_rect = self.__enter_to_back_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
 
         self.__char = self.__oppo = self.__bg = self.__side = None
         self.__bg_animation = self.__fighter = self.__opponent = None
         self.__health_bar_tl = self.__health_bar_tr = None
-        self.__opponent_arrow = self.__fighter_arrow = None
 
 
     @override
-    def _on_enter(self, data: dict | None) -> None:
-        self.__timer = 90.0
+    def on_enter(self, data: dict | None) -> None:
+        self.__timer = 90
+        self.__result = None
+        self.__is_end_game = False
 
         self.__char = data.get('char', None)
         self.__oppo = data.get('oppo', None)
@@ -48,8 +53,10 @@ class BattleScene(Scene):
         self.__side = data.get('side', None)
 
         self.__bg_animation = BackgroundFactory.create_background(self.__bg)
+        self.__ground_y = self.__bg_animation.get_ground_y_ratio() * WINDOW_HEIGHT
         self.__fighter = CharacterFactory.create_character(self.__char)
         self.__opponent = CharacterFactory.create_character(self.__oppo)
+
         # Set initial positions and health bars based on side
         positions = [
             (100, 'topleft'),
@@ -73,18 +80,6 @@ class BattleScene(Scene):
         
         threading.Thread(target=self.__recv_worker, daemon=True).start()
 
-    def _send_broadcast_packet(self, data: dict):
-        header = PacketHeader(CommandId.BROADCAST.value, 4 * 4 + 1) 
-        packet = SendBroadcastPacket(
-            header=header,
-            x=data['x'],
-            y=data['y'],
-            hp=data['hp'],
-            flipped=int(data['flipped']),
-            state=CHARACTER_STATES[data['state']]
-        )
-        self._tcp_client.send(packet.to_bytes())
-
     def __recv_worker(self):
         """
         This method is intended to run in a separate thread to handle network communication.
@@ -95,67 +90,83 @@ class BattleScene(Scene):
             packet_header = PacketHeader.from_bytes(res[:HEADER_SIZE])
             if packet_header.command_id == CommandId.BROADCAST.value:
                 packet = RecvBroadcastPacket.from_bytes(res)
-                self.__opponent.set_x(packet.x)
-                self.__opponent.set_y(packet.y)
-                self.__opponent.set_hp(packet.hp)
-                self.__opponent.set_flipped(packet.flipped)
-                self.__opponent.set_state(CHARACTER_REVERSIBLE_STATES[packet.state])
-            elif packet_header.command_id == CommandId.OPPONENT_OUT.value:
-                self._scene_manager.set_scene(MAIN_SCENE)
+                self.__fighter.set_x(packet.x_c)
+                self.__fighter.set_y(packet.y_c)
+                self.__fighter.set_hp(packet.hp_c)
+                self.__fighter.set_state(CHARACTER_REVERSIBLE_STATES[packet.state_c])
+
+                self.__opponent.set_x(packet.x_o)
+                self.__opponent.set_y(packet.y_o)
+                self.__opponent.set_hp(packet.hp_o)
+                self.__opponent.set_state(CHARACTER_REVERSIBLE_STATES[packet.state_o])
+            if packet_header.command_id == CommandId.END_GAME.value:
+                packet = EndGamePacket.from_bytes(res)
+                self.__is_end_game = True
+                self.__result = packet.result
                 return
-
-    def __update_arrow(self, arrow_attr: str, owner: Character, screen: pygame.Surface, delta_time: float):
-        """
-        Update and draw the arrow for the given owner character.
-        """
-        arrow = getattr(self, arrow_attr, None)
-        if arrow is None and hasattr(owner, 'get_arrow'):
-            arrow = owner.get_arrow()
-            setattr(self, arrow_attr, arrow)
-        if arrow:
-            arrow.update(delta_time)
-            if arrow.get_rect().x < 0 or arrow.get_rect().x > WINDOW_WIDTH:
-                setattr(self, arrow_attr, None)
-            else:
-                arrow.draw(screen)
-        return arrow
-    
-    def __update_end_game(self, screen: pygame.Surface) -> None: # TODO: fix bug thread haven't been closed
-        """
-        Placeholder for end game logic.
-        This method can be used to handle the end of the game, such as showing a game over screen or resetting the game.
-        """
-        if not self.__is_end_game:
-            self.__is_end_game = True
-        if self.__fighter.is_dead():
-            screen.blit(self.you_lost_text, self.you_lost_text_rect)
-        elif self.__opponent.is_dead():
-            screen.blit(self.you_win_text, self.you_win_text_rect)
-        elif self.__fighter.get_hp() > self.__opponent.get_hp():
-            screen.blit(self.you_win_text, self.you_win_text_rect)
-        elif self.__fighter.get_hp() < self.__opponent.get_hp():
-            screen.blit(self.you_lost_text, self.you_lost_text_rect)
-        else:
-            screen.blit(self.draw_text, self.draw_text_rect)
-
-        screen.blit(self.enter_to_back_text, self.enter_to_back_text_rect)
 
 
     def draw(self, screen: pygame.Surface) -> None:
-        if not all([self.__bg_animation, self.__fighter, self.__opponent]): return
+        if not all([self.__bg_animation, self.__fighter, self.__opponent, self.__health_bar_tl, self.__health_bar_tr]): return
         scaled_bg_image = pygame.transform.scale(self.__bg_animation.get_current_frame(), (WINDOW_WIDTH, WINDOW_HEIGHT))
         screen.blit(scaled_bg_image, (0, 0))
-        self.__fighter.draw(screen)
+
+        self.__fighter.draw(self.__ground_y, screen)
         self.__health_bar_tl.draw(screen)
-        self.__opponent.draw(screen)
+        self.__opponent.draw(self.__ground_y, screen)
         self.__health_bar_tr.draw(screen)
         self.__fighter.look_at(self.__opponent)
         self.__opponent.look_at(self.__fighter)
 
     def handle_event(self, event: pygame.event.Event):
         if not self.__is_end_game:
-            if self.__fighter is None: return
-            self.__fighter.handle_event(event)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_z:
+                    self.__fighter.attack_z()
+                    header = PacketHeader(command_id=CommandId.ATK.value, packet_length=4)
+                    packet = AtkPacket(header, atk=1)
+                    self._tcp_client.send(packet.to_bytes())
+
+                if event.key == pygame.K_x:
+                    self.__fighter.attack_x()
+                    header = PacketHeader(command_id=CommandId.ATK.value, packet_length=4)
+                    packet = AtkPacket(header, atk=2)
+                    self._tcp_client.send(packet.to_bytes())
+
+                if event.key == pygame.K_c:
+                    self.__fighter.attack_c()
+                    header = PacketHeader(command_id=CommandId.ATK.value, packet_length=4)
+                    packet = AtkPacket(header, atk=3)
+                    self._tcp_client.send(packet.to_bytes())
+
+                if event.key == pygame.K_SPACE:
+                    header = PacketHeader(command_id=CommandId.JUMP.value, packet_length=0)
+                    self._tcp_client.send(header.to_bytes())
+                    self.__fighter.jump()
+                
+                if event.key == pygame.K_LEFT:
+                    self.__fighter.walk_left()
+                    header = PacketHeader(command_id=CommandId.MOVE.value, packet_length=4)
+                    packet = MovePacket(header, x=1)
+                    self._tcp_client.send(packet.to_bytes())
+
+                if event.key == pygame.K_RIGHT:
+                    self.__fighter.walk_right()
+                    header = PacketHeader(command_id=CommandId.MOVE.value, packet_length=4)
+                    packet = MovePacket(header, x=2)
+                    self._tcp_client.send(packet.to_bytes())
+                
+                if event.key == pygame.K_LSHIFT:
+                    self.__fighter.defend()
+
+            if event.type == pygame.KEYUP:
+                if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+                    self.__fighter.stop_movement()
+                    header = PacketHeader(command_id=CommandId.MOVE.value, packet_length=4)
+                    packet = MovePacket(header, x=3)
+                    self._tcp_client.send(packet.to_bytes())
+                if event.key == pygame.K_LSHIFT:
+                    self.__fighter.undefend()
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -164,56 +175,24 @@ class BattleScene(Scene):
     def update(self, screen: pygame.Surface, delta_time: float):
         if not all([self.__bg_animation, self.__fighter, self.__opponent]): return
 
-        if self.__timer > 0:
-            self.__timer -= delta_time
-            if self.__timer < 0:
-                self.__timer = 0
+        if pygame.time.get_ticks() - self.__last_time >= 1000 and not self.__is_end_game:
+            self.__last_time = pygame.time.get_ticks()
+            self.__timer -= 1
 
         self.__bg_animation.update(delta_time)
-
-        ground_y = WINDOW_HEIGHT * self.__bg_animation.get_ground_y_ratio()
-        self.__fighter.apply_gravity(ground_y, delta_time)
-        self.__opponent.apply_gravity(ground_y, delta_time)
-
-        fighter_hurt_box = self.__fighter.get_rect()
-        opponent_atk_hitbox = self.__opponent.get_attack_hitbox(screen)
-
-        # Take Damage Logic
-        if opponent_atk_hitbox and opponent_atk_hitbox.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
-            intersection = opponent_atk_hitbox.clip(fighter_hurt_box)
-            damage_ratio = intersection.width / self.__fighter.get_rect().width
-            damage = self.__opponent.get_atk() * damage_ratio - self.__fighter.get_armor()
-            self.__fighter.take_damage(int(max(0, damage)))
-
-        # Fighter Kick Logic
-        if getattr(self.__opponent, 'get_kick_away_box', None):
-            get_kick_away_box = self.__opponent.get_kick_away_box()
-            if get_kick_away_box and get_kick_away_box.colliderect(fighter_hurt_box) and not self.__fighter.is_defend():
-                self.__fighter.take_damage(
-                    damage=int(max(0, self.__opponent.get_atk() - self.__fighter.get_armor())),
-                    knock_back=200
-                )
-
-        # Archer Arrow Logic
-        self.__opponent_arrow = self.__update_arrow('__opponent_arrow', self.__opponent, screen, delta_time)
-        self.__fighter_arrow = self.__update_arrow('__fighter_arrow', self.__fighter, screen, delta_time)
-
-        if self.__opponent_arrow and self.__opponent_arrow.get_rect().colliderect(
-                fighter_hurt_box) and not self.__fighter.is_defend():
-            damage = self.__opponent_arrow.get_damage() - self.__fighter.get_armor()
-            self.__fighter.take_damage(int(max(0.0, damage)))
 
         self.__fighter.update(screen, delta_time)
         self.__opponent.update(screen, delta_time)
 
-        # Send broadcast packet with fighter's state
-        self._send_broadcast_packet(self.__fighter.get_broadcast_data())
-
-        if self.__fighter.is_dead() or self.__opponent.is_dead() or self.__timer <= 0:
-            self.__update_end_game(screen)
-            return
-
-        self.__fighter.handle_input(pygame.key.get_pressed(), delta_time)
-
         timer_text = self.__timer_font.render(str(int(self.__timer)), True, Colors.WHITE.value)
         screen.blit(timer_text, (WINDOW_WIDTH // 2 - timer_text.get_width() // 2, 5))
+
+        if self.__is_end_game:
+            if self.__result is not None:
+                screen.blit(self.__enter_to_back_text, self.__enter_to_back_text_rect)
+                if self.__result == 1:
+                    screen.blit(self.__you_win_text, self.__you_win_text_rect)
+                elif self.__result == 2:
+                    screen.blit(self.__you_lost_text, self.__you_lost_text_rect)
+                else:
+                    screen.blit(self.__draw_text, self.__draw_text_rect)
