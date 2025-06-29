@@ -6,7 +6,7 @@ from core.const import *
 from core.network.tcp_client import TCPClient
 from core.scene.scene_manager import SceneManager
 
-class FightinGameApplication:
+class FightingGameApplication:
     def __init__(self):
         self.__tcp_client = TCPClient(HOST, PORT)
         try:
