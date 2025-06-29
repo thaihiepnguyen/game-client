@@ -1,3 +1,5 @@
+## How to setup this project
+
 ### 1. Prerequisites
 
 - At least python3.12
@@ -18,6 +20,10 @@ pip3 install -r requirements.txt
 python3 main.py
 ```
 
-### 4. Preview
 
-![image](./preview/battle.png)
+## Preview
+
+### 1. Gameplay
+![image](./preview/game-play-2.png)
+![image](./preview/game-play-1.png)
+
