@@ -22,7 +22,7 @@ class Archer(Character):
         super().update(_, delta_time)
 
         for arrow in self.__arrows[:]:  # Shallow copy
-            if arrow.update(delta_time):
+            if not arrow.update(delta_time):
                 self.__arrows.remove(arrow)
 
     @override
