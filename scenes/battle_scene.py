@@ -3,11 +3,13 @@ from typing import override
 from core.background.background_factory import BackgroundFactory
 from core.character.character_factory import CharacterFactory
 from core.scene.scene import Scene
+from network.recv.arrow_packet import ArrowPacket
 from network.recv.end_game_packet import EndGamePacket
 from network.recv.recv_broadcast_packet import RecvBroadcastPacket
 from network.send.atk_packet import AtkPacket
 from network.send.def_packet import DefPacket
 from network.send.move_packet import MovePacket
+from sprites.characters.archer.arrow.arrow import Arrow
 from sprites.health_bar.health_bar import HealthBar
 from core.const import CHARACTER_REVERSIBLE_STATES, CHARACTER_WIDTH, FONT, WINDOW_HEIGHT, WINDOW_WIDTH, Colors, \
     CommandId, HEADER_SIZE, MAIN_SCENE
@@ -100,6 +102,17 @@ class BattleScene(Scene):
                 self.__opponent.set_y(packet.y_o)
                 self.__opponent.set_hp(packet.hp_o)
                 self.__opponent.set_state(CHARACTER_REVERSIBLE_STATES[packet.state_o])
+
+            if packet_header.command_id == CommandId.ARROW.value:
+                packet = ArrowPacket.from_bytes(res)
+                arrow = Arrow(x=packet.x, y=packet.y, is_flipped=False if packet.direction == 1 else True)
+                if packet.owner == 1:
+                    if hasattr(self.__fighter, 'add_arrow'):
+                        self.__fighter.add_arrow(arrow)
+                else:
+                    if hasattr(self.__opponent, 'add_arrow'):
+                        self.__opponent.add_arrow(arrow)
+
             if packet_header.command_id == CommandId.END_GAME.value:
                 packet = EndGamePacket.from_bytes(res)
                 self.__is_end_game = True

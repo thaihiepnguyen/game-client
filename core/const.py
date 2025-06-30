@@ -26,13 +26,17 @@ LITTLE_BYTE_ORDER = "little"  # Byte order for network packets
 HEADER_SIZE = 8  # Size of the packet header in bytes
 
 class CommandId(Enum):
+    # send
     WAIT_FOR_MATCH = 1
     BROADCAST = 2
     MOVE = 3
     DEF = 4
     JUMP = 5
     ATK = 6
+
+    # receive
     END_GAME = 7
+    ARROW = 8
 
     
 
@@ -47,7 +51,7 @@ class Colors(Enum):
     WHITE = (255, 255, 255)
 
 
-# Constarts for characters
+# Constants for characters
 class CharacterId(Enum):
     ARCHER = 1
     FIGHTER = 2

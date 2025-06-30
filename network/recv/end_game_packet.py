@@ -14,7 +14,7 @@ class EndGamePacket(RecvPacket):
     @classmethod
     def from_bytes(cls, data: bytes) -> Self:
         """
-        Deserializes the MovePacket from bytes.
+        Deserializes the EndgamePacket from bytes.
         """
         result = int.from_bytes(data[HEADER_SIZE:HEADER_SIZE + 4], LITTLE_BYTE_ORDER)
         return cls(result)
