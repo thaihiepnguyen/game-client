@@ -24,9 +24,8 @@ class CharacterAnimation(ABC):
                 self.__animations[self.__current_action].complete()
                 self.__animations[self.__current_action].reset()
                 self.__current_action = action_type
-            self.__animations[self.__current_action].update(delta_time)
-        else:
-            raise ValueError(f"Action type '{action_type}' not found in animations.")
+
+        self.__animations[self.__current_action].update(delta_time)
 
     def get_current_frame(self, flip: bool = False) -> pygame.Surface:
         """
@@ -44,15 +43,7 @@ class CharacterAnimation(ABC):
         Get the current animation object for the current action.
         :return: The current Animation object.
         """
-        if self.__current_action in self.__animations:
-            return self.__animations[self.__current_action]
-        else:
-            raise ValueError(f"Current action '{self.__current_action}' not found in animations.")
-        
-    def get_animation_by_action(self, action: str):
-        if action not in self.__animations:
-            raise ValueError(f"Action '{action}' not found in animations.")
-        return self.__animations[action]
+        return self.__animations[self.__current_action]
 
     def _set_scale(self) -> float:
         """
