@@ -5,11 +5,13 @@ from core.character.character_factory import CharacterFactory
 from core.scene.scene import Scene
 from network.recv.arrow_packet import ArrowPacket
 from network.recv.end_game_packet import EndGamePacket
+from network.recv.fire_ball_packet import FireBallPacket
 from network.recv.recv_broadcast_packet import RecvBroadcastPacket
 from network.send.atk_packet import AtkPacket
 from network.send.def_packet import DefPacket
 from network.send.move_packet import MovePacket
 from sprites.characters.archer.arrow.arrow import Arrow
+from sprites.characters.wizard.fireball.fireball import Fireball
 from sprites.health_bar.health_bar import HealthBar
 from core.const import CHARACTER_REVERSIBLE_STATES, CHARACTER_WIDTH, FONT, WINDOW_HEIGHT, WINDOW_WIDTH, Colors, \
     CommandId, HEADER_SIZE, MAIN_SCENE
@@ -116,6 +118,16 @@ class BattleScene(Scene):
                 target = self.__fighter if packet.owner == 1 else self.__opponent
                 if hasattr(target, 'add_arrow'):
                     target.add_arrow(arrow)
+
+            elif packet_header.command_id == CommandId.FIRE_BALL.value:
+                packet = FireBallPacket.from_bytes(res)
+                fire_ball = Fireball(x=packet.x, y=packet.y, is_flipped=False if packet.direction == 1 else True)
+                if packet.owner == 1:
+                    if hasattr(self.__fighter, 'add_fire_ball'):
+                        self.__fighter.add_fire_ball(fire_ball)
+                else:
+                    if hasattr(self.__opponent, 'add_fire_ball'):
+                        self.__opponent.add_fire_ball(fire_ball)
 
             elif packet_header.command_id == CommandId.END_GAME.value:
                 packet = EndGamePacket.from_bytes(res)

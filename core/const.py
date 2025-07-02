@@ -38,6 +38,7 @@ class CommandId(Enum):
     END_GAME = 7
     ARROW = 8
     OPPONENT_OUT = 9
+    FIRE_BALL = 10
 
     
 
