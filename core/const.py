@@ -37,6 +37,7 @@ class CommandId(Enum):
     # receive
     END_GAME = 7
     ARROW = 8
+    OPPONENT_OUT = 9
 
     
 
