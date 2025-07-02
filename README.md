@@ -37,6 +37,10 @@ python3 main.py
 ```
 
 ## Preview
+Here is video demo from the game:
+
+[![Watch the video](https://img.youtube.com/vi/vnJETyQNMSA/0.jpg)](https://www.youtube.com/watch?v=vnJETyQNMSA)
+
 
 Here are some screenshots from the game:
 
