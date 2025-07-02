@@ -1,29 +1,46 @@
-## How to setup this project
+# Game Client
 
-### 1. Prerequisites
+This is a simple GUI client for a multiplayer fighting game. You can connect, play, and battle with others in real time.
+## Table of Contents
 
-- At least python3.12
+- [About](#about)
+- [Setup](#setup)
+- [How to Run](#how-to-run)
+- [Preview](#preview)
 
-### 2. Install dependencies
+## About
+
+This project is a graphical client for a multiplayer fighting game. It lets you join battles, see what's happening in the game, and have fun fighting other players.
+
+## Setup
+
+### Prerequisites
+
+- Make sure you have Python 3.12 or newer installed.
+
+### Install Dependencies
+
+Open your terminal and run:
 
 ```bash
 python3 -m venv venv
-
 source venv/bin/activate
-
-pip3 install -r requirements.txt 
+pip3 install -r requirements.txt
 ```
 
-### 3. Run project
+## How to Run
 
-```
+Start the game with:
+
+```bash
 python3 main.py
 ```
 
-
 ## Preview
 
-### 1. Gameplay
-![image](./preview/game-play-2.png)
-![image](./preview/game-play-1.png)
+Here are some screenshots from the game:
 
+![Main Screen](./preview/main.png)
+![Battle Scene 1](./preview/battle-1.png)
+![Battle Scene 2](./preview/battle-2.png)
+![Battle Scene 3](./preview/battle-3.png)
